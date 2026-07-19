@@ -1,0 +1,67 @@
+==============================================================================
+MANUFACTURER vs OPERATION — nested variance decomposition of log(life)
+N = 417 bladders with valid life
+==============================================================================
+
+------------------------------------------------------------------------------
+1) OVERALL and BY CAUSE
+------------------------------------------------------------------------------
+
+[ALL causes]  N=416  parts=25  lots=128
+  part (design)          :  39.8%  -> manufacturer (design)
+  lot within part (batch):   5.9%  -> manufacturer (production)
+  within-lot residual    :  54.3%  -> operation + noise
+  => manufacturer-linked :  45.7%   operation-linked :  54.3%
+
+[Leak]  N=255  parts=24  lots=100
+  part (design)          :  58.8%  -> manufacturer (design)
+  lot within part (batch):  13.1%  -> manufacturer (production)
+  within-lot residual    :  28.0%  -> operation + noise
+  => manufacturer-linked :  72.0%   operation-linked :  28.0%
+
+[Deform]  N=131  parts=10  lots=44
+  part (design)          :  10.6%  -> manufacturer (design)
+  lot within part (batch):   9.4%  -> manufacturer (production)
+  within-lot residual    :  80.0%  -> operation + noise
+  => manufacturer-linked :  20.0%   operation-linked :  80.0%
+
+------------------------------------------------------------------------------
+2) INSTALL-LOT EFFECT WITHIN EACH PART  (Kruskal-Wallis, eps^2)
+------------------------------------------------------------------------------
+  part      type     #lot    N   eps^2           p   read
+  B-MT-006  MTG         7   40  -0.035       0.564   no batch signal
+  B-TU-001  Turnup      4   29  -0.054       0.647   no batch signal
+  B-TU-004  Turnup      6   36   0.343     0.00922   BATCH signal
+  B-TU-005  Turnup      5   24   0.103       0.203   no batch signal
+  B-TU-007  Turnup      6   47   0.204      0.0202   BATCH signal
+  B-TU-009  Turnup      6   33   0.002       0.409   no batch signal
+  B-TU-012  Turnup      6   43  -0.003       0.431   no batch signal
+
+------------------------------------------------------------------------------
+3) TWO CLOCKS — premature clustering by INSTALL vs REMOVAL quarter
+------------------------------------------------------------------------------
+premature units (life < 0.5 x part median): 72 / 417 (17%)
+  install_q : chi2= 11.2  dof=10  p=0.345
+  removal_q : chi2= 22.7  dof=8  p=0.00379
+
+Premature rate by REMOVAL quarter:
+            n  prem_rate
+removal_q               
+2024Q3     22       50.0
+2024Q4     53       25.0
+2025Q1     44       18.0
+2025Q2     39       18.0
+2025Q3     62       13.0
+2025Q4     69       14.0
+2026Q1     64       11.0
+2026Q2     52       12.0
+2026Q3     12       17.0
+
+------------------------------------------------------------------------------
+4) EFFECT SIZES  Life ~ single factor  (Kruskal-Wallis eps^2)
+------------------------------------------------------------------------------
+  Life ~ part         eps^2= 0.415  p=6.08e-29  (k=17)
+  Life ~ install_q    eps^2= 0.011  p=0.137  (k=9)
+  Life ~ removal_q    eps^2= 0.072  p=1.06e-05  (k=9)
+  Life ~ cause        eps^2=-0.002  p=0.501  (k=4)
+  Life ~ bladder_type eps^2= 0.105  p=1.26e-10  (k=3)
