@@ -1,0 +1,324 @@
+<style>
+  :root{
+    --paper:#eef0ec; --surface:#ffffff; --ink:#191d22; --muted:#5c646d;
+    --line:rgba(20,26,32,.12); --hair:rgba(20,26,32,.07);
+    --them:#2c6c99; --them-soft:rgba(44,108,153,.14);
+    --us:#c06a2a; --us-soft:rgba(192,106,42,.14);
+    --crit:#c23a26; --crit-soft:rgba(194,58,38,.12);
+    --good:#3f7d54;
+    --shadow:0 1px 2px rgba(20,26,32,.05),0 8px 26px rgba(20,26,32,.06);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#101317; --surface:#181c22; --ink:#e7eaee; --muted:#98a2ad;
+      --line:rgba(230,236,242,.14); --hair:rgba(230,236,242,.08);
+      --them:#5aa2d4; --them-soft:rgba(90,162,212,.16);
+      --us:#e0965a; --us-soft:rgba(224,150,90,.16);
+      --crit:#e5634f; --crit-soft:rgba(229,99,79,.16);
+      --good:#6fb387;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#eef0ec; --surface:#ffffff; --ink:#191d22; --muted:#5c646d;
+    --line:rgba(20,26,32,.12); --hair:rgba(20,26,32,.07);
+    --them:#2c6c99; --them-soft:rgba(44,108,153,.14);
+    --us:#c06a2a; --us-soft:rgba(192,106,42,.14);
+    --crit:#c23a26; --crit-soft:rgba(194,58,38,.12); --good:#3f7d54;
+    --shadow:0 1px 2px rgba(20,26,32,.05),0 8px 26px rgba(20,26,32,.06);
+  }
+  :root[data-theme="dark"]{
+    --paper:#101317; --surface:#181c22; --ink:#e7eaee; --muted:#98a2ad;
+    --line:rgba(230,236,242,.14); --hair:rgba(230,236,242,.08);
+    --them:#5aa2d4; --them-soft:rgba(90,162,212,.16);
+    --us:#e0965a; --us-soft:rgba(224,150,90,.16);
+    --crit:#e5634f; --crit-soft:rgba(229,99,79,.16); --good:#6fb387;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  body{margin:0}
+  .wrap{
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    background:var(--paper); color:var(--ink); font-family:var(--sans);
+    line-height:1.5; padding:clamp(18px,4vw,54px);
+    display:flex; justify-content:center;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sheet{width:100%; max-width:1080px; display:flex; flex-direction:column; gap:26px}
+  .tnum{font-variant-numeric:tabular-nums}
+  .mono{font-family:var(--mono)}
+
+  /* ---- header ---- */
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted); margin:0 0 12px}
+  h1{font-size:clamp(28px,4.4vw,46px); line-height:1.04; letter-spacing:-.02em;
+    font-weight:800; margin:0; text-wrap:balance; max-width:20ch}
+  h1 .them{color:var(--them)} h1 .us{color:var(--us)}
+  .lede{font-size:clamp(15px,1.7vw,18px); color:var(--muted);
+    margin:14px 0 0; max-width:62ch}
+
+  /* ---- stat row ---- */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .stat{background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:18px 20px; box-shadow:var(--shadow)}
+  .stat .k{font-size:clamp(30px,4.6vw,44px); font-weight:800; letter-spacing:-.02em;
+    line-height:1; font-family:var(--mono)}
+  .stat .l{font-size:13.5px; color:var(--muted); margin-top:8px; line-height:1.35}
+  .stat.split .k{display:flex; gap:.35em; align-items:baseline}
+
+  /* ---- generic card ---- */
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    padding:clamp(18px,2.4vw,28px); box-shadow:var(--shadow)}
+  .h{font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--muted); font-family:var(--mono); margin:0 0 4px}
+  .cap{font-size:22px; font-weight:750; letter-spacing:-.01em; margin:0 0 18px}
+  .cap.tight{margin-bottom:6px}
+
+  /* ---- attribution bars ---- */
+  .attr{display:flex; flex-direction:column; gap:22px}
+  .row .rowhead{display:flex; justify-content:space-between; align-items:baseline;
+    gap:12px; margin-bottom:8px; flex-wrap:wrap}
+  .rowhead .name{font-weight:700; font-size:16px}
+  .rowhead .name b{font-weight:800}
+  .rowhead .verdict{font-family:var(--mono); font-size:12.5px; font-weight:700;
+    padding:3px 10px; border-radius:999px}
+  .v-them{background:var(--them-soft); color:var(--them)}
+  .v-us{background:var(--us-soft); color:var(--us)}
+  .bar{display:flex; height:38px; border-radius:9px; overflow:hidden;
+    border:1px solid var(--line)}
+  .seg{display:flex; align-items:center; justify-content:center; color:#fff;
+    font-family:var(--mono); font-size:12.5px; font-weight:700; min-width:0;
+    white-space:nowrap}
+  .seg small{opacity:.85; font-weight:600}
+  .s-design{background:var(--them)}
+  .s-batch{background:color-mix(in srgb,var(--them) 55%, #7f7f7f)}
+  .s-op{background:var(--us)}
+  .barkey{display:flex; gap:16px; flex-wrap:wrap; margin-top:9px;
+    font-size:12.5px; color:var(--muted)}
+  .barkey span{display:inline-flex; align-items:center; gap:6px}
+  .sw{width:11px; height:11px; border-radius:3px; display:inline-block}
+
+  /* ---- two clocks ---- */
+  .clocks{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+  .clock .ch{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+  .clock .tag{font-family:var(--mono); font-size:12px; font-weight:700;
+    padding:2px 9px; border-radius:999px}
+  .tag.no{background:var(--them-soft); color:var(--them)}
+  .tag.yes{background:var(--crit-soft); color:var(--crit)}
+  .clock .sub{font-size:13px; color:var(--muted); margin:2px 0 14px}
+  .spark{display:flex; align-items:flex-end; gap:5px; height:118px}
+  .spark .b{flex:1; border-radius:4px 4px 2px 2px; min-width:0; position:relative}
+  .spark .b .v{position:absolute; top:-17px; left:0; right:0; text-align:center;
+    font-family:var(--mono); font-size:11px; font-weight:700; color:var(--muted)}
+  .spark .b.hot .v{color:var(--crit)}
+  .spark .lab{position:absolute; bottom:-19px; left:0; right:0; text-align:center;
+    font-family:var(--mono); font-size:10px; color:var(--muted)}
+  .clock .axis{height:1px; background:var(--line); margin-top:22px}
+  .clock .foot{font-size:12px; color:var(--muted); margin-top:6px}
+
+  /* ---- batch chips ---- */
+  .chips{display:flex; gap:14px; flex-wrap:wrap; margin-top:4px}
+  .chip{border:1.5px solid var(--them); border-radius:12px; padding:14px 18px;
+    display:flex; flex-direction:column; gap:2px; min-width:200px; flex:1}
+  .chip .id{font-family:var(--mono); font-weight:800; font-size:20px; color:var(--them)}
+  .chip .m{font-family:var(--mono); font-size:12.5px; color:var(--muted)}
+
+  /* ---- fix columns ---- */
+  .fix{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+  .col{background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    padding:22px 24px; box-shadow:var(--shadow); border-top:4px solid}
+  .col.them{border-top-color:var(--them)}
+  .col.us{border-top-color:var(--us)}
+  .col h3{margin:0 0 3px; font-size:19px; letter-spacing:-.01em}
+  .col .who{font-family:var(--mono); font-size:12px; text-transform:uppercase;
+    letter-spacing:.12em; margin-bottom:14px}
+  .col.them .who{color:var(--them)} .col.us .who{color:var(--us)}
+  ul.acts{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px}
+  ul.acts li{display:flex; gap:11px; font-size:14.5px; line-height:1.4}
+  ul.acts li::before{content:""; flex:none; width:8px; height:8px; border-radius:2px;
+    margin-top:7px; background:currentColor; opacity:.55}
+  .col.them li{color:var(--ink)} .col.us li{color:var(--ink)}
+  .col.them li::before{background:var(--them); opacity:1}
+  .col.us li::before{background:var(--us); opacity:1}
+
+  /* ---- footer / method ---- */
+  .method{border:1px dashed var(--line); border-radius:16px; padding:22px 24px;
+    background:transparent}
+  .method .grid{display:grid; grid-template-columns:1.1fr .9fr; gap:26px}
+  .method h4{font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--muted); font-family:var(--mono); margin:0 0 10px}
+  .method p{margin:0 0 10px; font-size:13px; color:var(--muted); line-height:1.5}
+  .refs{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:11px}
+  .refs li{font-size:12.5px; line-height:1.4}
+  .refs a{color:var(--them); text-decoration:none; font-weight:600}
+  .refs a:hover{text-decoration:underline}
+  .refs .src{color:var(--muted); font-family:var(--mono); font-size:11px}
+  .caveat{margin-top:16px; font-size:12px; color:var(--muted); border-top:1px solid var(--hair);
+    padding-top:14px; line-height:1.5}
+  .caveat b{color:var(--ink)}
+  a:focus-visible,li:focus-visible{outline:2px solid var(--us); outline-offset:3px; border-radius:4px}
+
+  @media (max-width:760px){
+    .stats{grid-template-columns:1fr} .clocks{grid-template-columns:1fr}
+    .fix{grid-template-columns:1fr} .method .grid{grid-template-columns:1fr; gap:18px}
+  }
+</style>
+
+<div class="wrap">
+  <div class="sheet">
+
+    <header>
+      <p class="eyebrow">Bladder failure &middot; root-cause attribution &middot; N = 417 scrapped units</p>
+      <h1>Why do bladders die early? It&rsquo;s <span class="them">them</span> and <span class="us">us</span> &mdash; and it splits by how they fail.</h1>
+      <p class="lede">Leaks are on the manufacturer. Deformation is on us. Only two parts have a real bad-batch case. And the failures line up with a <b>plant event in mid-2024</b> &mdash; not a bad delivery.</p>
+    </header>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="k tnum">47%</div>
+        <div class="l">of scrapped bladders never reached their target life</div>
+      </div>
+      <div class="stat split">
+        <div class="k tnum"><span class="them">46</span><span style="color:var(--muted);font-size:.5em">/</span><span class="us">54</span></div>
+        <div class="l"><span style="color:var(--them);font-weight:700">manufacturer</span> vs <span style="color:var(--us);font-weight:700">us</span> &mdash; roughly half-and-half overall</div>
+      </div>
+      <div class="stat">
+        <div class="k tnum">2</div>
+        <div class="l">parts &mdash; and only two &mdash; carry a genuine bad-batch signal</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <p class="h">The real answer</p>
+      <h2 class="cap tight">Split the blame by failure mode &mdash; pooled, it cancels out</h2>
+      <p style="color:var(--muted);font-size:13.5px;margin:0 0 20px">Share of lifetime variation explained, by source &mdash; nested variance decomposition on log-life.</p>
+
+      <div class="attr">
+        <div class="row">
+          <div class="rowhead">
+            <div class="name"><b>Leak</b> &nbsp;<span style="color:var(--muted);font-weight:500">62% of all failures</span></div>
+            <div class="verdict v-them">&rarr; Mostly THEM &middot; ~72% manufacturer</div>
+          </div>
+          <div class="bar">
+            <div class="seg s-design" style="flex:59">Design&nbsp;<small>59%</small></div>
+            <div class="seg s-batch" style="flex:13">13%</div>
+            <div class="seg s-op" style="flex:28">Ops&nbsp;<small>28%</small></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="rowhead">
+            <div class="name"><b>Deform</b> &nbsp;<span style="color:var(--muted);font-weight:500">31% of all failures</span></div>
+            <div class="verdict v-us">&rarr; Mostly US &middot; ~80% operation</div>
+          </div>
+          <div class="bar">
+            <div class="seg s-design" style="flex:11">11%</div>
+            <div class="seg s-batch" style="flex:9">9%</div>
+            <div class="seg s-op" style="flex:80">Operation &mdash; same delivery, different outcome&nbsp;<small>80%</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="barkey">
+        <span><i class="sw" style="background:var(--them)"></i> Part / design &mdash; <b style="color:var(--them)">manufacturer</b></span>
+        <span><i class="sw" style="background:color-mix(in srgb,var(--them) 55%,#7f7f7f)"></i> Batch / delivered lot &mdash; manufacturer</span>
+        <span><i class="sw" style="background:var(--us)"></i> Within-lot &mdash; <b style="color:var(--us)">us (handling / process)</b></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <p class="h">The clincher &middot; two clocks</p>
+      <h2 class="cap tight">When were they <em>made</em> vs when did they <em>die</em>?</h2>
+      <p style="color:var(--muted);font-size:13.5px;margin:0 0 20px">Premature-failure rate over time. If a bad delivery were the cause, it clusters by install date. It doesn&rsquo;t &mdash; it clusters by <b style="color:var(--crit)">when they died on our floor</b>.</p>
+
+      <div class="clocks">
+        <div class="clock">
+          <div class="ch">
+            <strong>By INSTALL quarter</strong>
+            <span class="tag no">flat &middot; p = 0.35</span>
+          </div>
+          <div class="sub">when the part was made / delivered</div>
+          <div class="spark" role="img" aria-label="Premature rate by install quarter is flat, no clustering">
+            <div class="b" style="height:22%;background:var(--them-soft);border:1px solid var(--them)"><span class="v tnum">14</span><span class="lab">24Q4</span></div>
+            <div class="b" style="height:26%;background:var(--them-soft);border:1px solid var(--them)"><span class="v tnum">16</span><span class="lab">25Q1</span></div>
+            <div class="b" style="height:20%;background:var(--them-soft);border:1px solid var(--them)"><span class="v tnum">12</span><span class="lab">25Q2</span></div>
+            <div class="b" style="height:28%;background:var(--them-soft);border:1px solid var(--them)"><span class="v tnum">17</span><span class="lab">25Q3</span></div>
+            <div class="b" style="height:23%;background:var(--them-soft);border:1px solid var(--them)"><span class="v tnum">15</span><span class="lab">25Q4</span></div>
+            <div class="b" style="height:21%;background:var(--them-soft);border:1px solid var(--them)"><span class="v tnum">13</span><span class="lab">26Q1</span></div>
+          </div>
+          <div class="axis"></div>
+          <div class="foot">No bad-manufacturing window. Rules out &ldquo;a bad delivery period.&rdquo;</div>
+        </div>
+
+        <div class="clock">
+          <div class="ch">
+            <strong>By REMOVAL quarter</strong>
+            <span class="tag yes">spike &middot; p = 0.004</span>
+          </div>
+          <div class="sub">when the part actually failed in the plant</div>
+          <div class="spark" role="img" aria-label="Premature rate by removal quarter spikes to 50 percent in 2024 Q3">
+            <div class="b hot" style="height:100%;background:var(--crit)"><span class="v tnum">50</span><span class="lab">24Q3</span></div>
+            <div class="b" style="height:50%;background:var(--us-soft);border:1px solid var(--us)"><span class="v tnum">25</span><span class="lab">24Q4</span></div>
+            <div class="b" style="height:36%;background:var(--us-soft);border:1px solid var(--us)"><span class="v tnum">18</span><span class="lab">25Q1</span></div>
+            <div class="b" style="height:36%;background:var(--us-soft);border:1px solid var(--us)"><span class="v tnum">18</span><span class="lab">25Q2</span></div>
+            <div class="b" style="height:26%;background:var(--us-soft);border:1px solid var(--us)"><span class="v tnum">13</span><span class="lab">25Q3</span></div>
+            <div class="b" style="height:28%;background:var(--us-soft);border:1px solid var(--us)"><span class="v tnum">14</span><span class="lab">25Q4</span></div>
+          </div>
+          <div class="axis"></div>
+          <div class="foot"><b style="color:var(--crit)">50% premature in 2024&thinsp;Q3</b> &mdash; a plant / machine event. Pull the maintenance logs.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <p class="h">The honest exceptions</p>
+      <h2 class="cap tight">Where you <em>can</em> take it to the supplier</h2>
+      <p style="color:var(--muted);font-size:13.5px;margin:0 0 16px">Only these two parts fail together by delivered lot &mdash; a real bad-batch fingerprint (Kruskal&ndash;Wallis on install lot). Every other part varies <em>within</em> every delivery, so &ldquo;bad batch&rdquo; isn&rsquo;t supported.</p>
+      <div class="chips">
+        <div class="chip"><span class="id">B-TU-004</span><span class="m">&epsilon;&sup2; = 0.34 &middot; p = 0.009 &middot; strong lot effect</span></div>
+        <div class="chip"><span class="id">B-TU-007</span><span class="m">&epsilon;&sup2; = 0.20 &middot; p = 0.02 &middot; strong lot effect</span></div>
+      </div>
+    </section>
+
+    <section class="fix">
+      <div class="col them">
+        <div class="who">Their half &middot; manufacturer</div>
+        <h3>Take these to the supplier</h3>
+        <ul class="acts">
+          <li>Open a supplier-quality review on the <b>leak-dominant parts</b> &mdash; design &amp; incoming quality.</li>
+          <li>File <b>lot claims on B-TU-004 &amp; B-TU-007</b> only &mdash; the two with a real batch signal.</li>
+          <li>Tighten claims with serial adjacency: near-consecutive serials = same production run.</li>
+        </ul>
+      </div>
+      <div class="col us">
+        <div class="who">Our half &middot; operation</div>
+        <h3>Fix on our floor</h3>
+        <ul class="acts">
+          <li><b>PLC air-purge interlock + handling SOP</b> &mdash; kills the deform failures (80% ours).</li>
+          <li><b>Trace the 2024&thinsp;Q3 spike</b>: one machine, one process change, or one consumable batch?</li>
+          <li>Start logging <b>true lot numbers + machine / press ID</b> &mdash; turns the next argument from inference into proof.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="method">
+      <div class="grid">
+        <div>
+          <h4>Method</h4>
+          <p>Life is right-skewed (Weibull &beta;&nbsp;&asymp;&nbsp;1), so all tests run on log-life or use the non-parametric Kruskal&ndash;Wallis, reporting effect size (&epsilon;&sup2; / &eta;&sup2;), not just p. Blame is separated by a <b>nested variance decomposition</b>: part (design) &rarr; lot within part (batch) &rarr; within-lot residual (operation) &mdash; the standard batch-vs-within-batch split used for supplier-vs-process diagnosis in manufacturing.</p>
+        </div>
+        <div>
+          <h4>Method credibility &mdash; references</h4>
+          <ul class="refs">
+            <li><a href="https://link.springer.com/article/10.1023/A:1024457408540">ANOVA Method for Variance-Component Decomposition &amp; Diagnosis in Batch Manufacturing Processes</a><br><span class="src">Flexible Services &amp; Manufacturing Journal (Springer) &mdash; batch vs within-batch = supplier vs process</span></li>
+            <li><a href="https://www.tandfonline.com/doi/full/10.1081/QEN-120003564">Variance Component Calculations: Methods &amp; Misapplications</a><br><span class="src">Quality Engineering (Taylor &amp; Francis) &mdash; why SS-share overstates the batch term</span></li>
+            <li><a href="https://faculty.washington.edu/fscholz/Reports/weibullanalysis.pdf">Weibull Reliability Analysis with censored life data</a><br><span class="src">F. Scholz, Univ. of Washington &mdash; basis for the survivorship caveat</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="caveat"><b>Read the fine print in the meeting.</b> &ldquo;Us&rdquo; is the residual after design + batch, so it also absorbs random noise &mdash; treat 54% as an <b>upper bound</b>. There is no true lot number or machine ID in the data yet (lot is proxied by install date), and the 2024&thinsp;Q3 removal spike needs a maturation-bias check &mdash; recently-installed units still running aren&rsquo;t in the data &mdash; before it&rsquo;s claimed as a hard event. The direction of every finding is solid; the exact percentages are soft.</p>
+    </section>
+
+  </div>
+</div>
