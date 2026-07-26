@@ -81,6 +81,8 @@ Also already available in-session: document skills (`docx`, `pdf`, `pptx`,
 `/plugin install document-skills@anthropic-agent-skills` line is an interactive
 CLI command (not tool-runnable); those skills are already active here.
 
+Local project skill **`visual-qa`** (`.claude/skills/visual-qa/`): after building/editing ANY HTML visual, run its `scripts/shoot.py <file.html>` to render + screenshot, then Read the PNG and verify it's accurate and error-free before handing it over. Always close this loop.
+
 Suggested per-stage order for a fresh CSV: `explore-data` → `statistical-analysis`
 → `create-viz`/`data-visualization` → `build-dashboard` (audience-facing).
 
