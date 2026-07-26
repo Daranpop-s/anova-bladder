@@ -1,0 +1,46 @@
+============================================================================
+POSITION (C/AR/R) & MACHINE  vs  BLADDER LIFE   +  conflict check
+N joined = 417 bladders (position found 416, machine 416)
+============================================================================
+
+Life by POSITION (cycles):
+            n    mean  median
+position                     
+AR        162  1268.0   590.0
+C          75   892.0   492.0
+R         179  1181.0   637.0
+
+1) Single-factor screens on log-life:
+  position   k=3   N=416  eta2=0.006  ANOVA p=3.00e-01  Kruskal p=3.85e-01  Levene p=1.84e-03
+  machine    k=14  N=408  eta2=0.221  ANOVA p=1.78e-15  Kruskal p=3.18e-14  Levene p=5.20e-03
+  oldnew     k=2   N=416  eta2=0.156  ANOVA p=5.62e-17  Kruskal p=2.34e-16  Levene p=4.95e-02
+  bladder_type k=3   N=417  eta2=0.120  ANOVA p=3.06e-12  Kruskal p=1.26e-10  Levene p=1.29e-02
+  cause      k=3   N=402  eta2=0.009  ANOVA p=1.78e-01  Kruskal p=3.53e-01  Levene p=4.28e-01
+
+2) Confound check — position vs bladder_type (counts):
+bladder_type  MTG  Push  Turnup
+position                       
+AR              0    14     148
+C              74     0       1
+R               0    18     161
+
+   position vs cause (counts):
+cause     Bad material  Burn out  Deform  Flabby  Leak  Quality issue  Tear
+position                                                                   
+AR                   1         2      64       0    92              0     3
+C                    1         1       0       3    64              3     2
+R                    0         3      67       0    99              0    10
+
+3) Position effect WITHIN part (Type-II ANOVA  logL ~ C(part_code) + C(position)):
+   N=373, adj-R2=0.310
+               sum_sq     df        F  PR(>F)  eta_sq
+C(part_code)  25.1045   11.0  15.7880  0.0000  0.3253
+C(position)    0.1650    2.0   0.5707  0.5657  0.0021
+Residual      51.8951  359.0      NaN     NaN  0.6725
+
+4) Machine effect WITHIN part (Type-II ANOVA  logL ~ C(part_code) + C(machine)):
+   N=372, adj-R2=0.357
+               sum_sq     df       F  PR(>F)  eta_sq
+C(part_code)  14.8228   11.0  9.9812  0.0000  0.2217
+C(machine)     5.1983   13.0  2.9619  0.0004  0.0777
+Residual      46.8472  347.0     NaN     NaN  0.7006

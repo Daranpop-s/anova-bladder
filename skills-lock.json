@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "build-dashboard": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "skillPath": "data/skills/build-dashboard/SKILL.md",
+      "computedHash": "978eb2a7d02cfb91967e94f78567464a68aa222c4e95583d1c7a970d89028c00"
+    },
+    "create-viz": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "skillPath": "data/skills/create-viz/SKILL.md",
+      "computedHash": "fba08bfbed7bad31c794169dcde5de9fbc5fdf2307ac00d81832092613a4b079"
+    },
+    "data-analyst": {
+      "source": "borghei/claude-skills",
+      "sourceType": "github",
+      "skillPath": "data-analytics/data-analyst/SKILL.md",
+      "computedHash": "2c428069b7d89f314aaefb23a6b6f8c7f6f1c65ed51cd3ba1552a907bfd032c7"
+    },
+    "data-scientist": {
+      "source": "borghei/claude-skills",
+      "sourceType": "github",
+      "skillPath": "data-analytics/data-scientist/SKILL.md",
+      "computedHash": "6d15d2cdcd8c1f5f4b51d817a69be927f24a6901c413197cbd40987ba5b12e83"
+    },
+    "data-visualization": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "skillPath": "data/skills/data-visualization/SKILL.md",
+      "computedHash": "64055493de5ff4afed716cc871018cf6e020338b76d3e7ed5c2985707cb43cec"
+    },
+    "explore-data": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "skillPath": "data/skills/explore-data/SKILL.md",
+      "computedHash": "eeb0f7d4b8a834f773253a3038ca41b38b5ce2c1706dd0a4f3f7b4a38ce819e3"
+    },
+    "statistical-analysis": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "skillPath": "data/skills/statistical-analysis/SKILL.md",
+      "computedHash": "6dba9b6a31e7ffc7205120700151a3522df91c19a6dba3d13bb9b4835e768feb"
+    }
+  }
+}

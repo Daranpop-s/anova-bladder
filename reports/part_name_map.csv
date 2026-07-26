@@ -1,0 +1,26 @@
+part_code,part_name,vote_share,n
+B-MT-001,MTG Bladder,0.93,14
+B-MT-002,"MTG Bladder 10"" 12""",0.75,4
+B-MT-003,"MTG Bladder 15""",1.0,2
+B-MT-004,"MTG Bladder 16""",1.0,4
+B-MT-005,"MTG Bladder 22"" 23""",1.0,2
+B-MT-006,"MTG Bladder 22"" 23""",1.0,44
+B-MT-007,"MTG Bladder 8""",1.0,1
+B-MT-008,Bladder MTG,1.0,3
+B-PU-001,"Bladder push 20""",1.0,16
+B-PU-002,"Bladder push 21""",1.0,3
+B-PU-003,"Bladder push 22""",1.0,6
+B-PU-004,"Bladder push 23""",1.0,7
+B-TU-001,"Bladder turnup 23""",1.0,42
+B-TU-002,"Bladder turnup 14""",1.0,24
+B-TU-003,"Bladder turnup 21""",1.0,15
+B-TU-004,"Bladder turnup 10""",0.98,42
+B-TU-005,"Bladder turnup 12""",1.0,28
+B-TU-006,"Bladder turnup 15""",1.0,11
+B-TU-007,"Bladder turnup 15""",1.0,52
+B-TU-008,"Bladder turnup 16""",1.0,1
+B-TU-009,"Bladder turnup 20""",0.97,37
+B-TU-010,"Bladder turnup 22""",0.86,7
+B-TU-011,"Bladder turnup 6""",1.0,1
+B-TU-012,"Bladder turnup 8""",1.0,48
+B-TU-013,"Bladder turnup 21""",1.0,2
