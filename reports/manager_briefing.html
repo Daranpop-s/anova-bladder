@@ -277,8 +277,33 @@
       <p style="color:var(--muted);font-size:13.5px;margin:0 0 16px">Only these two parts fail together by delivered lot &mdash; a real bad-batch fingerprint (Kruskal&ndash;Wallis on install lot). Every other part varies <em>within</em> every delivery, so &ldquo;bad batch&rdquo; isn&rsquo;t supported.</p>
       <div class="chips">
         <div class="chip"><span class="id">B-TU-004</span><span class="m">&epsilon;&sup2; = 0.34 &middot; p = 0.009 &middot; strong lot effect</span></div>
-        <div class="chip"><span class="id">B-TU-007</span><span class="m">&epsilon;&sup2; = 0.20 &middot; p = 0.02 &middot; strong lot effect</span></div>
+        <div class="chip"><span class="id">B-TU-007</span><span class="m">&epsilon;&sup2; = 0.20 &middot; p = 0.02 &middot; but see machine &rarr;</span></div>
       </div>
+      <p style="color:var(--muted);font-size:12.5px;margin:14px 0 0">&#9888; Caution: part of B-TU-007&rsquo;s &ldquo;bad-lot&rdquo; signal is actually a <b style="color:var(--us)">machine</b> effect (next panel) &mdash; confirm before filing a supplier claim.</p>
+    </section>
+
+    <section class="card">
+      <p class="h">The concrete operation lever &middot; NEW</p>
+      <h2 class="cap tight">It&rsquo;s the machine &mdash; and we can prove it now</h2>
+      <p style="color:var(--muted);font-size:13.5px;margin:0 0 18px">With real machine IDs added, the machine a bladder runs on <b>significantly affects its life even for the same part</b> (&eta;&sup2;&nbsp;=&nbsp;0.078, p&nbsp;=&nbsp;0.0004). This is the &ldquo;operation&rdquo; share made concrete &mdash; and it&rsquo;s <em>ours</em>.</p>
+
+      <p style="font-weight:700;font-size:14.5px;margin:0 0 4px">Same part <span class="mono">B-TU-007</span>, three machines &mdash; median life (cycles)</p>
+      <p style="color:var(--muted);font-size:12.5px;margin:0 0 12px">Identical bladder. The only thing that changed is the machine.</p>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="mono" style="width:74px;font-size:13px;font-weight:700">PAP14</span>
+          <div style="flex:1;background:var(--hair);border-radius:6px;overflow:hidden"><div style="width:100%;height:26px;background:var(--us-soft);border:1px solid var(--us);border-radius:6px;display:flex;align-items:center;padding-left:10px" class="mono">1,605</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="mono" style="width:74px;font-size:13px;font-weight:700">PAP21A</span>
+          <div style="flex:1;background:var(--hair);border-radius:6px;overflow:hidden"><div style="width:71%;height:26px;background:var(--us-soft);border:1px solid var(--us);border-radius:6px;display:flex;align-items:center;padding-left:10px" class="mono">1,148</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="mono" style="width:74px;font-size:13px;font-weight:700;color:var(--crit)">PAP21B</span>
+          <div style="flex:1;background:var(--hair);border-radius:6px;overflow:hidden"><div style="width:14%;height:26px;background:var(--crit);border-radius:6px;display:flex;align-items:center;padding-left:10px;color:#fff" class="mono">226</div></div>
+        </div>
+      </div>
+      <p style="font-size:13px;margin:16px 0 0"><b style="color:var(--crit)">7&times; shorter on PAP21B.</b> Worst machines by premature rate (n&nbsp;&ge;&nbsp;12): <b>PAP13 33%</b>, <b>PAP21B 29%</b>, <b>BNS20 28%</b> vs best PAP20 0%, PAP21A 9%. Position on the drum (C&thinsp;/&thinsp;AR&thinsp;/&thinsp;R) &mdash; checked &mdash; has <b>no</b> effect (it just tracks bladder type).</p>
     </section>
 
     <section class="fix">
@@ -287,7 +312,7 @@
         <h3>Take these to the supplier</h3>
         <ul class="acts">
           <li>Open a supplier-quality review on the <b>leak-dominant parts</b> &mdash; design &amp; incoming quality.</li>
-          <li>File <b>lot claims on B-TU-004 &amp; B-TU-007</b> only &mdash; the two with a real batch signal.</li>
+          <li>Lot claim on <b>B-TU-004</b> is clean. <b>B-TU-007</b> &mdash; verify it isn&rsquo;t the PAP21B machine first.</li>
           <li>Tighten claims with serial adjacency: near-consecutive serials = same production run.</li>
         </ul>
       </div>
@@ -295,9 +320,9 @@
         <div class="who">Our half &middot; operation</div>
         <h3>Fix on our floor</h3>
         <ul class="acts">
+          <li><b>Audit machines PAP13, PAP21B, BNS20</b> &mdash; same parts die 7&times; faster there. Biggest concrete lever.</li>
           <li><b>PLC air-purge interlock + handling SOP</b> &mdash; kills the deform failures (80% ours).</li>
-          <li><b>Trace the 2024&thinsp;Q3 spike</b>: one machine, one process change, or one consumable batch?</li>
-          <li>Start logging <b>true lot numbers + machine / press ID</b> &mdash; turns the next argument from inference into proof.</li>
+          <li><b>Trace the 2024&thinsp;Q3 spike</b> on the PAP21B &amp; BNS line &mdash; process change or consumable batch?</li>
         </ul>
       </div>
     </section>
@@ -306,7 +331,7 @@
       <div class="grid">
         <div>
           <h4>Method</h4>
-          <p>Life is right-skewed (Weibull &beta;&nbsp;&asymp;&nbsp;1), so all tests run on log-life or use the non-parametric Kruskal&ndash;Wallis, reporting effect size (&epsilon;&sup2; / &eta;&sup2;), not just p. Blame is separated by a <b>nested variance decomposition</b>: part (design) &rarr; lot within part (batch) &rarr; within-lot residual (operation) &mdash; the standard batch-vs-within-batch split used for supplier-vs-process diagnosis in manufacturing.</p>
+          <p>Life is right-skewed (Weibull &beta;&nbsp;&asymp;&nbsp;1), so all tests run on log-life or use the non-parametric Kruskal&ndash;Wallis, reporting effect size (&epsilon;&sup2; / &eta;&sup2;), not just p. Blame is separated by a <b>nested variance decomposition</b>: part (design) &rarr; lot within part (batch) &rarr; within-lot residual (operation) &mdash; the standard batch-vs-within-batch split used for supplier-vs-process diagnosis in manufacturing. Machine and position (C&thinsp;/&thinsp;AR&thinsp;/&thinsp;R) tested within-part via Type-II ANOVA (N&nbsp;=&nbsp;417, machine IDs joined from the event log).</p>
         </div>
         <div>
           <h4>Method credibility &mdash; references</h4>
@@ -317,7 +342,7 @@
           </ul>
         </div>
       </div>
-      <p class="caveat"><b>Read the fine print in the meeting.</b> &ldquo;Us&rdquo; is the residual after design + batch, so it also absorbs random noise &mdash; treat 54% as an <b>upper bound</b>. There is no true lot number or machine ID in the data yet (lot is proxied by install date), and the 2024&thinsp;Q3 removal spike needs a maturation-bias check &mdash; recently-installed units still running aren&rsquo;t in the data &mdash; before it&rsquo;s claimed as a hard event. The direction of every finding is solid; the exact percentages are soft.</p>
+      <p class="caveat"><b>Read the fine print in the meeting.</b> &ldquo;Us&rdquo; is the residual after design + batch, so it also absorbs random noise &mdash; treat 54% as an <b>upper bound</b>. Lot is still proxied by install date (no true lot number yet), and the 2024&thinsp;Q3 removal spike needs a maturation-bias check &mdash; recently-installed units still running aren&rsquo;t in the data &mdash; before it&rsquo;s claimed as a hard event. The direction of every finding is solid; the exact percentages are soft.</p>
     </section>
 
   </div>

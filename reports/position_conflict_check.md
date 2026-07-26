@@ -56,6 +56,34 @@ smoking-gun machine. Cell counts are tiny (≤5), so this is a lead, not proof �
 life — but this is entangled with reuse/survivorship (an "Old" unit already survived
 a prior cycle), so treat as descriptive, not causal, until defined precisely.
 
+## 5. Deep-dive — PAP13 / PAP21B, and a same-part smoking gun
+Are these machines genuinely bad, or do they just run bad parts? Comparing the
+**same part across machines** removes the part confound:
+
+| Part | Machine A | Machine B | Machine C |
+|------|-----------|-----------|-----------|
+| **B-TU-007** | PAP14: **1,605** | PAP21A: 1,148 | **PAP21B: 226** |
+| B-TU-004 | PAP16: 539 | PAP21A: 354 | PAP21B: 314 |
+| B-TU-001 | PAP19: 1,946 | PAP17: 922 | **PAP13: 434** |
+| B-MT-006 | BNS18: 493 | BNS19: 492 | BNS20: 375 |
+
+(median life, cycles). **Same bladder, 7× shorter on PAP21B than PAP14** — the
+machine, not the part, is doing this.
+
+**Important reinterpretation of C5:** the earlier B-TU-007 "bad-batch" signal is at
+least partly a **PAP21B machine effect** — B-TU-007 units that ran on PAP21B died
+young, and install-lot correlates with which machine was used. So **B-TU-004 remains
+a clean supplier-batch case, but B-TU-007 should be verified against PAP21B before
+filing a manufacturer claim.** This is a *refinement*, not a contradiction — both the
+old and new analyses agree those two parts are the anomalies; the new data reassigns
+one of them from "them" to "us."
+
+- PAP13 (33% premature) runs mostly B-TU-001 (deform-heavy) + some Push; it is the
+  worst machine for B-TU-001 specifically (434 vs 922–1,946 elsewhere).
+- PAP21B (29% premature) runs Turnups only; worst for B-TU-007 and B-TU-004.
+- 2024Q3 spike sits on PAP21B + the BNS line — consistent with these being the
+  problem machines.
+
 ## Bottom line
 No contradiction with the earlier ANOVA. Position (C/AR/R) turns out to be a
 disguised type variable and carries no independent effect. Machine is the genuinely
