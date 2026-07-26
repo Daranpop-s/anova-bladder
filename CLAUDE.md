@@ -64,14 +64,25 @@ tested within-part via Type-II ANOVA.
   **install** time → a plant event, not a bad delivery.
 
 ## Installed skills (`.agents/skills/`, symlinked into `.claude/skills/`)
-- `data-analyst` — general data analysis.
-- `build-dashboard` — interactive dashboards (installed in place of the requested
-  `interactive-dashboard-builder`, which doesn't exist under that name).
-- `data-visualization` — charts/viz (installed in place of the requested
-  `visualization-expert`, not found in `shubhamsaboo/awesome-llm-apps`).
-- Document skills (`docx`, `pdf`, `pptx`, `xlsx`) and `dataviz` are already
-  available in the session (the `/plugin install document-skills` line is an
-  interactive CLI command, not runnable as a tool).
+Stack chosen for the workflow **raw CSV → insights & relationships → simple
+visuals for non-data-scientist audiences** (pinned in `skills-lock.json`):
+
+| Stage | Skill | Source |
+|-------|-------|--------|
+| Profile a new CSV (shape, nulls, quality) | `explore-data` | knowledge-work-plugins |
+| Stats: significance, correlation, outliers, trends | `statistical-analysis` | knowledge-work-plugins |
+| ML / modeling / feature engineering | `data-scientist` | borghei/claude-skills |
+| General SQL + analysis + reporting | `data-analyst` | borghei/claude-skills |
+| Pick the right chart, publication quality | `create-viz`, `data-visualization` | knowledge-work / kw |
+| Interactive HTML dashboard for stakeholders | `build-dashboard` | knowledge-work-plugins |
+
+Also already available in-session: document skills (`docx`, `pdf`, `pptx`,
+`xlsx`) for Excel/deck deliverables, and `dataviz`. The
+`/plugin install document-skills@anthropic-agent-skills` line is an interactive
+CLI command (not tool-runnable); those skills are already active here.
+
+Suggested per-stage order for a fresh CSV: `explore-data` → `statistical-analysis`
+→ `create-viz`/`data-visualization` → `build-dashboard` (audience-facing).
 
 ## Git
 Work branch: `claude/anova-test-3ikcqe`. Commit + push there.
