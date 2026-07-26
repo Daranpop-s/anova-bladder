@@ -20,10 +20,29 @@ ext = pd.read_csv("data/clean/bladder_ext_clean.csv", parse_dates=["scrap_date"]
 raw["co"] = pd.to_datetime(raw["checkoutdate"], dayfirst=True, errors="coerce")
 scr = raw[raw["statusbladder"] == "ทิ้ง"].sort_values("co").groupby("Title").tail(1)
 ext["machine"] = scr.set_index("Title")["Machine"].reindex(ext["bladder_id"]).values
+ext["position"] = scr.set_index("Title")["position"].reindex(ext["bladder_id"]).values
 ext = ext[(ext.bladder_life > 0) & ext.target_life.notna()].copy()
 ext["ratio"] = ext.bladder_life / ext.target_life
 n_total = len(ext)
 fair = ext[ext.ratio >= FAIR].copy()
+
+# ---- formal within-part ANOVA behind the visuals (the numbers for skeptics) ----
+def within_part_anova(df, factor, fmin):
+    import statsmodels.formula.api as smf, statsmodels.api as sm
+    d = df.dropna(subset=[factor, "bladder_life", "part_code"]).copy()
+    d["logL"] = np.log10(d["bladder_life"])
+    for col, mn in (("part_code", 8), (factor, fmin)):
+        vc = d[col].value_counts(); d = d[d[col].isin(vc[vc >= mn].index)]
+    m = smf.ols(f"logL ~ C(part_code) + C({factor})", data=d).fit()
+    aov = sm.stats.anova_lm(m, typ=2)
+    key = f"C({factor})"
+    return dict(eta2=round(float(aov.loc[key, "sum_sq"] / aov["sum_sq"].sum()), 3),
+                p=float(aov.loc[key, "PR(>F)"]), n=int(len(d)))
+# On the FULL recorded set (the 'new full data'): a bad machine's damage is
+# largely the early deaths, so the fair-run filter would understate it — the
+# significance test uses all recorded units; the charts stay on the fair set.
+stat_machine = within_part_anova(ext, "machine", 10)
+stat_position = within_part_anova(ext, "position", 4)
 
 def size_of(name):
     import re
@@ -85,7 +104,8 @@ sample_rows = [[r.scrap_date.strftime("%Y-%m-%d"), r.part_name, int(r.target_lif
 DATA = dict(
     meta=dict(n_total=n_total, n_fair=len(fair), excluded=n_total-len(fair),
               fair_pct=round(len(fair)/n_total*100), below=int((fair.ratio<1).sum()),
-              leak_them=round(fair[fair.cause=="Leak"].shape[0]), unit_note="≥50% of promised life"),
+              leak_them=round(fair[fair.cause=="Leak"].shape[0]), unit_note="≥50% of promised life",
+              stat_machine=stat_machine, stat_position=stat_position),
     points=pts, sample=sample_rows, proof_us=proof_us, proof_them=proof_them, board=board)
 
 Path("reports").mkdir(exist_ok=True)

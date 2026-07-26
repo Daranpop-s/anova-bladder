@@ -182,6 +182,7 @@
       <p id="s5p"></p>
       <p>It&rsquo;s the <b>identical bladder</b> — same maker, same size, same delivery. The one thing that differs is the <b>press it ran on</b>. A part can&rsquo;t be defective on one machine and excellent on another. <b>This is us</b> — and it&rsquo;s fixable in weeks, not a design cycle.</p>
       <div class="caveat" id="s5cav"></div>
+      <div class="compute" id="s5stat"></div>
     </div>
   </section>
 
@@ -202,6 +203,13 @@
       <p id="s6p"></p>
       <p>That tightness is the tell. When <em>we</em> cause a failure, outcomes <b>scatter</b> — different setters, different presses, different lives. This doesn&rsquo;t scatter. It lands in the same short spot every time, always a leak — the fingerprint of a defect <b>built into the part</b>. That&rsquo;s the make and size we hand to the maker: fix it, or give us a benchmark unit.</p>
     </div>
+  </section>
+
+  <!-- 6b · for the skeptics -->
+  <section class="final reveal" style="padding-bottom:10px">
+    <h2>For the skeptics — the statistics under the pictures.</h2>
+    <p class="sub">Everything above is a chart a mechanic can read. Here is the formal test behind it, for the room that asks &ldquo;is this just noise?&rdquo;</p>
+    <div class="board" id="stats"></div>
   </section>
 
   <!-- 7 · action board -->
@@ -287,6 +295,8 @@ function strip(svgId, proof){const svg=$(svgId);svg.innerHTML='';const W=640,H=4
  $('#s5title').textContent=`${u.part} — same part, one row per press`;
  $('#s5p').innerHTML=`The <b>${u.part}</b> (${u.cause.toLowerCase()}). On <b class="mono">${uw.machine}</b> it reaches only <b style="color:var(--broke)">${uw.pct}%</b> of its promise. On <b class="mono">${ub.machine}</b>, the very same part hits <b style="color:var(--kept)">${ub.pct}%</b>.`;
  $('#s5cav').innerHTML=`<b>The ask writes itself:</b> lift <b class="mono">${uw.machine}</b> to what the same part already does elsewhere. The ceiling isn&rsquo;t a guess — it&rsquo;s this bladder&rsquo;s own best press.`;
+ const sm=M.stat_machine, sp=M.stat_position;
+ $('#s5stat').innerHTML=`<b>The stat behind it</b> (full recorded data): holding the part fixed, the machine explains <b>${(sm.eta2*100).toFixed(1)}%</b> of remaining life variation (Type-II ANOVA, p=${sm.p<1e-4?sm.p.toExponential(1):sm.p.toFixed(4)}). Position C/AR/R explains <b>${(sp.eta2*100).toFixed(1)}%</b> (p=${sp.p.toFixed(2)}, n.s.) — it just tracks bladder type.`;
  const tm=t.machines[0];
  $('#s6title').textContent=`${t.part} — one tight cluster, below the promise`;
  $('#s6p').innerHTML=`The <b>${t.part}</b> (${t.cause.toLowerCase()}). Every unit lands in a tight cluster at about <b style="color:var(--broke)">${tm.pct}%</b> of its promise — short, and short by the <b>same amount every time</b>. Almost all of it is one cause: a leak.`;
@@ -313,6 +323,26 @@ function strip(svgId, proof){const svg=$(svgId);svg.innerHTML='';const W=640,H=4
      </div>
      <div class="brow2"><span class="sol">${r.solution} <span style="color:var(--faint)">· focus ${r.focus}</span></span><span class="gain ${r.side}">${gain}</span></div>
    </div>`;}).join('');
+})();
+
+// stats strip
+(function(){const sm=M.stat_machine, sp=M.stat_position;
+ const rows=[
+   ["It&rsquo;s the machine (us)","Same part, different press — Type-II ANOVA within part, full recorded data",
+    `η² = ${(sm.eta2*100).toFixed(1)}% · p = ${sm.p<1e-4?sm.p.toExponential(1):sm.p.toFixed(4)}`,"us"],
+   ["Position C/AR/R doesn&rsquo;t matter","Same test on drum position",
+    `η² = ${(sp.eta2*100).toFixed(1)}% · p = ${sp.p.toFixed(2)} — not significant`,"them"],
+   ["Blame splits by cause","Nested variance decomposition of log-life (Searle)",
+    "Leak ≈ 72% maker · Deform ≈ 80% us · overall 46 / 54","them"],
+   ["It&rsquo;s a plant event, not a bad lot","Premature clustering — install vs removal quarter (χ²)",
+    "install p = 0.35 (n.s.) · removal p = 0.004","us"],
+ ];
+ $('#stats').innerHTML=rows.map(r=>`<div class="brow" style="grid-template-columns:200px 1fr auto">
+   <div><div class="bname">${r[0]}</div><div class="bmeta"><span class="pill ${r[3]}">${r[3]}</span></div></div>
+   <div style="font-size:13px;color:var(--muted)">${r[1]}</div>
+   <div class="mono" style="font-size:12.5px;color:var(--ink);text-align:right;font-weight:700">${r[2]}</div>
+ </div>`).join('')
+ +`<div class="bmeta" style="padding:10px 4px 0">Full method: scripts/variance_components.py · analyze_position.py · reports/ANOVA_METHODS_REPORT.md</div>`;
 })();
 
 $('#foot').textContent=`From ${M.n_total} records, ${M.n_fair} judged on a fair run (≥50% of target) · attribution color = recorded cause (leak→maker, deform→us) · reproducible via scripts/build_journey.py`;
