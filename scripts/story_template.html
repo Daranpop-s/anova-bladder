@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The bladders that broke their promise</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --ink:#e9edf2; --muted:#9aa6b2; --faint:#5b6672;
+    --line:rgba(233,237,242,.12); --hair:rgba(233,237,242,.07);
+    --broke:#e0574d; --kept:#37a86a; --leak:#4a92d6; --deform:#e08a33;
+    --g1:#e0574d; --g2:#f2b134; --g3:#37a86a;
+    --accent:#e0574d;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  :root[data-theme="light"]{
+    --bg:#f3f1ec; --panel:#ffffff; --ink:#1a1e24; --muted:#5a6673; --faint:#98a2ad;
+    --line:rgba(20,26,32,.14); --hair:rgba(20,26,32,.07);
+    --broke:#cc3d33; --kept:#1f8a52; --leak:#2f74bd; --deform:#c26f1c;
+    --g1:#cc3d33; --g2:#d69a1c; --g3:#1f8a52;
+  }
+  @media (prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --bg:#f3f1ec; --panel:#ffffff; --ink:#1a1e24; --muted:#5a6673; --faint:#98a2ad;
+      --line:rgba(20,26,32,.14); --hair:rgba(20,26,32,.07);
+      --broke:#cc3d33; --kept:#1f8a52; --leak:#2f74bd; --deform:#c26f1c;
+      --g1:#cc3d33; --g2:#d69a1c; --g3:#1f8a52;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+    line-height:1.55; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px; margin:0 auto; padding:clamp(20px,4vw,60px)}
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  h1,h2,h3{letter-spacing:-.02em; text-wrap:balance; margin:0}
+
+  /* hero */
+  .hero{min-height:78vh; display:flex; flex-direction:column; justify-content:center; gap:22px}
+  .kicker{font-family:var(--mono); font-size:12.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent)}
+  .hero h1{font-size:clamp(34px,6.4vw,74px); line-height:1.02; font-weight:850; max-width:15ch}
+  .hero p{font-size:clamp(16px,2.1vw,21px); color:var(--muted); max-width:56ch; margin:0}
+  .scrollcue{font-family:var(--mono); font-size:12px; color:var(--faint); letter-spacing:.15em; margin-top:10px}
+
+  /* stage scaffolding */
+  .stage{display:grid; grid-template-columns:1.35fr .95fr; gap:clamp(20px,3vw,44px);
+    align-items:start; padding:clamp(40px,7vh,90px) 0; border-top:1px solid var(--hair)}
+  .stage .figure{position:sticky; top:24px}
+  .stage .panel{padding-top:6px}
+  .stagelabel{font-family:var(--mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); margin-bottom:10px}
+  .stage h2{font-size:clamp(23px,3vw,34px); font-weight:800; margin-bottom:14px; line-height:1.08}
+  .stage .panel p{color:var(--muted); font-size:15px; margin:0 0 13px}
+  .stage .panel p b, .stage .panel p strong{color:var(--ink)}
+  .figwrap{background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:16px 14px 10px; box-shadow:0 10px 34px rgba(0,0,0,.22)}
+  .figtitle{font-size:13px; color:var(--muted); font-family:var(--mono); padding:2px 6px 10px}
+  svg{display:block; width:100%; height:auto; overflow:visible}
+  .compute{font-family:var(--mono); font-size:11.5px; color:var(--faint); margin-top:10px; padding:8px 10px;
+    border-left:2px solid var(--line); background:var(--hair); border-radius:0 8px 8px 0; line-height:1.5}
+  .compute b{color:var(--muted)}
+
+  /* reveal */
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media (prefers-reduced-motion:reduce){ .reveal{opacity:1; transform:none; transition:none} html{scroll-behavior:auto} }
+
+  /* legend / chips */
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); padding:4px 6px 0}
+  .legend span{display:inline-flex; align-items:center; gap:6px}
+  .dot{width:10px; height:10px; border-radius:50%; display:inline-block}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* table */
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th,td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--hair)}
+  th{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  td.num{ text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+  /* group list */
+  .groups{display:flex; flex-direction:column; gap:12px; margin-top:6px}
+  .grp{border:1px solid var(--line); border-left:4px solid; border-radius:10px; padding:12px 15px}
+  .grp.g1{border-left-color:var(--g1)} .grp.g2{border-left-color:var(--g2)} .grp.g3{border-left-color:var(--g3)}
+  .grp h4{margin:0 0 3px; font-size:15px}
+  .grp .parts{font-family:var(--mono); font-size:12.5px; color:var(--muted); margin-top:5px}
+  .grp p{font-size:13px; color:var(--muted); margin:4px 0 0}
+
+  /* caveat */
+  .caveat{border:1px dashed var(--line); border-radius:12px; padding:13px 16px; margin-top:14px;
+    font-size:13px; color:var(--muted); background:var(--hair)}
+  .caveat b{color:var(--ink)}
+  .caveat .h{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:5px}
+
+  /* money */
+  .bignum{font-family:var(--mono); font-size:clamp(38px,6vw,58px); font-weight:850; color:var(--accent); line-height:1; letter-spacing:-.02em}
+  .money-parts{display:flex; flex-direction:column; gap:8px; margin-top:14px}
+  .money-parts .row{display:flex; justify-content:space-between; gap:12px; font-size:13.5px; padding:8px 12px;
+    border:1px solid var(--line); border-radius:9px}
+  .money-parts .row .amt{font-family:var(--mono); color:var(--accent); font-weight:700}
+
+  .final{padding:60px 0 30px; border-top:1px solid var(--hair)}
+  .final h2{font-size:clamp(22px,3vw,32px); font-weight:800; margin-bottom:16px; max-width:24ch}
+  .caveats-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px}
+  .foot{margin-top:40px; font-size:12px; color:var(--faint); font-family:var(--mono); border-top:1px solid var(--hair); padding-top:16px}
+
+  .themebtn{position:fixed; top:14px; right:14px; z-index:50; background:var(--panel); color:var(--muted);
+    border:1px solid var(--line); border-radius:8px; padding:6px 11px; font-family:var(--mono); font-size:12px; cursor:pointer}
+  .themebtn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  @media (max-width:800px){
+    .stage{grid-template-columns:1fr; gap:18px} .stage .figure{position:static}
+    .caveats-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<button class="themebtn" id="themebtn" aria-label="Toggle light or dark">◐ theme</button>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">One dataset &middot; five angles</div>
+    <h1 id="heroh">Everything looked normal. Then we changed the angle.</h1>
+    <p id="herop"></p>
+    <div class="scrollcue">↓ scroll — we change exactly one thing at a time</div>
+  </header>
+
+  <!-- STAGE 1 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">The monthly scrap sheet — last 8 rows</div>
+        <table id="tbl"></table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 1 · the setup</div>
+      <h2>This is what the room sees every month.</h2>
+      <p id="s1p"></p>
+      <p>Some parts are rated for a few hundred cycles, some for a couple thousand. Nothing here says <em>problem</em>. Agree it looks fine — because the next chart flips it.</p>
+    </div>
+  </section>
+
+  <!-- STAGE 2 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Every bladder plotted against its own promise (log–log)</div>
+        <svg id="s2" viewBox="0 0 640 460" role="img" aria-label="Scatter of bladder life against target, colored by whether it met target"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--kept)"></i> kept its promise (on/above the line)</span>
+          <span><i class="dot" style="background:var(--broke)"></i> broke its promise (below)</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 2 · one change — normalize</div>
+      <h2>Plot each bladder against what we <em>paid</em> for.</h2>
+      <p>Raw cycles can't be compared — a 290-cycle part and a 1,680-cycle part live on different planets. So we put every part on one axis: <b>the diagonal is its target.</b> On or above the line, it did its job. Below the line, it broke a promise.</p>
+      <p>No statistics needed. <b id="s2broke"></b> of scrapped bladders sit <b style="color:var(--broke)">below the line</b>.</p>
+      <div class="compute"><b>How to read it:</b> x = target cycles, y = actual cycles, both log. The 45° line is where actual = target. Distance below the line = fraction of the promise unmet.</div>
+    </div>
+  </section>
+
+  <!-- STAGE 3 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Same chart — now the columns have names, and shapes</div>
+        <svg id="s3" viewBox="0 0 640 460" role="img" aria-label="Same scatter grouped by part, rings show spread"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--g1)"></i> G1 tight &amp; short</span>
+          <span><i class="dot" style="background:var(--g2)"></i> G2 wide &amp; short</span>
+          <span><i class="dot" style="background:var(--g3)"></i> G3 met promise</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 3 · one change — name it</div>
+      <h2>The dots pile into columns. Columns are parts.</h2>
+      <p>Two numbers sort every part: <b>how far its median sits from target</b>, and <b>how tight the spread is</b>. Same "badness," opposite fix:</p>
+      <div class="groups" id="grouplist"></div>
+      <div class="caveat"><span class="h">caveat — merged codes</span>The two <b>15″ turnup</b> entries are different part numbers that share a name; the wide G2 spread is partly that merge. Split them before acting.</div>
+    </div>
+  </section>
+
+  <!-- STAGE 3b -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Each part as a strip — colored by how it died</div>
+        <svg id="s3b" viewBox="0 0 640 470" role="img" aria-label="Per-part strips colored by failure cause"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--leak)"></i> Leak</span>
+          <span><i class="dot" style="background:var(--deform)"></i> Deform</span>
+          <span><i class="dot" style="background:var(--faint)"></i> other</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 3b · one change — cause</div>
+      <h2>If it were random, every column would be a mix.</h2>
+      <p>They aren't. Columns come out <b>near one pure color</b> — one part leaks, another deforms, almost exclusively. A near-pure column is the eye's version of a significant result, without saying "p-value" to the room.</p>
+      <p><b style="color:var(--leak)">Leak</b> is a made-part problem; <b style="color:var(--deform)">deform</b> is a same-delivery-different-outcome problem — ours, on the floor. The vocabulary carries into every later stage.</p>
+    </div>
+  </section>
+
+  <!-- STAGE 4 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Promise-ratio vs when the bladder was installed</div>
+        <svg id="s4" viewBox="0 0 640 430" role="img" aria-label="Ratio to target against install date"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--kept)"></i> met target</span>
+          <span><i class="dot" style="background:var(--broke)"></i> below target</span>
+          <span><i class="sw" style="background:var(--muted)"></i> promise line (ratio = 1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 4 · one change — time</div>
+      <h2>A bad lot clusters by <em>arrival</em>, not by death.</h2>
+      <p>Your question was lot defects — so we key time to <b>install date</b>, when a part was made and delivered, not when it happened to die. If a delivery were bad, the reds would bunch into a vertical band.</p>
+      <p>They don't — the reds are spread across every quarter. That points away from "a bad shipment" and toward something in the plant.</p>
+      <div class="caveat"><span class="h">caveat — survivorship</span>This sheet holds only bladders <b>already scrapped</b>. Long-lived units still running aren't here, so the recent months look short. Read the right edge with that in mind — it's the first thing a sharp judge attacks, so we say it first.</div>
+    </div>
+  </section>
+
+  <!-- STAGE 5 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Back to Stage 3 — now we lift the reds onto the line</div>
+        <svg id="s5" viewBox="0 0 640 460" role="img" aria-label="Same scatter with arrows lifting under-target parts to the promise line and money annotations"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--g1)"></i> lift these</span>
+          <span><i class="sw" style="background:var(--kept)"></i> to the promise line</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 5 · one change — money</div>
+      <h2>The only chart the room acts on.</h2>
+      <p>Same picture they've now seen three times — so no one is decoding new axes. The arrows lift the under-target parts up to their own promise. The gap they close is money.</p>
+      <div class="bignum" id="redthb"></div>
+      <p style="margin-top:6px">headroom in the three under-target parts — the focused, fixable slice.</p>
+      <div class="money-parts" id="moneyparts"></div>
+      <div class="caveat"><span class="h">caveat — headroom, not savings</span>Valued at an <b>assumed ฿30,000 / bladder</b> (swap in the real cost). This is the gap to target if every under-target unit just reached its promise — <b>headroom you could recover</b>, not money already in the bank. Fleet-wide the same math is <b id="fleetthb"></b>.</div>
+    </div>
+  </section>
+
+  <!-- FINAL -->
+  <section class="final reveal">
+    <h2>What the room should walk out believing.</h2>
+    <div class="caveats-grid">
+      <div class="grp g1"><h4>Two parts are engineerable (G1)</h4><p id="fg1"></p></div>
+      <div class="grp g2"><h4>One part is out of control (G2)</h4><p id="fg2"></p></div>
+      <div class="grp g3"><h4>It isn't a bad lot</h4><p>Under-target parts don't cluster by install date — the failure lives in the plant and the part design, not a delivery window.</p></div>
+      <div class="grp" style="border-left-color:var(--muted)"><h4>Everything is stated in the open</h4><p>Survivorship, the merged 15″ codes, the ~24× target spread on a few freak long-lived units, and ฿ as headroom-not-savings — printed here so they can't be used against the story.</p></div>
+    </div>
+    <div class="foot" id="foot"></div>
+  </section>
+
+</div>
+
+<script>
+const DATA = /*__DATA__*/;
+const M = DATA.meta;
+const $ = s => document.querySelector(s);
+const fmt = n => n.toLocaleString('en-US');
+const baht = n => '฿' + (n>=1e6 ? (n/1e6).toFixed(2)+'M' : fmt(Math.round(n)));
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------- copy ----------
+$('#herop').textContent = `${M.raw} rows of bladder scrap records. ${M.n} with a usable life reading. `
+  + `The table balances, the totals foot, nobody flags it. And yet ${M.broke_pct}% never did what we paid for — you just can't see it until the axis changes.`;
+$('#s1p').textContent = `${M.n} bladders, each with a target life and the life it actually reached. It reconciles. It looks like a normal month.`;
+$('#s2broke').textContent = `${M.broke} of ${M.n} (${M.broke_pct}%)`;
+$('#redthb').textContent = baht(DATA.money.red);
+$('#fleetthb').textContent = baht(DATA.money.fleet);
+
+// ---------- Stage 1 table ----------
+(function(){
+  const head='<tr><th>scrapped</th><th>part</th><th class="num">target</th><th class="num">life</th><th>cause</th></tr>';
+  const body=DATA.sample.map(r=>`<tr><td class="mono">${r[0]}</td><td>${r[1]}</td><td class="num">${fmt(r[2])}</td><td class="num">${fmt(r[3])}</td><td>${r[4]}</td></tr>`).join('');
+  $('#tbl').innerHTML=head+body;
+})();
+
+// ---------- scale helpers ----------
+function logScale(dmin,dmax,rmin,rmax){
+  const a=Math.log(dmin), b=Math.log(dmax);
+  return v => rmin + (rmax-rmin)*(Math.log(v)-a)/(b-a);
+}
+function linScale(dmin,dmax,rmin,rmax){ return v => rmin+(rmax-rmin)*(v-dmin)/(dmax-dmin); }
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function jitter(seed){ const x=Math.sin(seed*127.1)*43758.5; return (x-Math.floor(x))-0.5; }
+
+const TARGETS=[150,1800], LIVES=[12,13000];
+// ---------- reusable target-vs-life scatter ----------
+function scatterTL(svg, colorFn, opts={}){
+  svg.innerHTML='';
+  const W=640,H=460, m={l:52,r:16,t:14,b:42};
+  const x=logScale(TARGETS[0],TARGETS[1],m.l,W-m.r);
+  const y=logScale(LIVES[0],LIVES[1],H-m.b,m.t);
+  // grid + axis ticks
+  [200,400,800,1600].forEach(t=>{ if(t<TARGETS[1]){ svg.appendChild(el('line',{x1:x(t),x2:x(t),y1:m.t,y2:H-m.b,stroke:cssv('--hair')}));
+    const tx=el('text',{x:x(t),y:H-m.b+16,'text-anchor':'middle',fill:cssv('--faint'),'font-size':10,'font-family':'monospace'}); tx.textContent=fmt(t); svg.appendChild(tx);} });
+  [30,100,300,1000,3000,10000].forEach(v=>{ svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),stroke:cssv('--hair')}));
+    const ty=el('text',{x:m.l-7,y:y(v)+3,'text-anchor':'end',fill:cssv('--faint'),'font-size':10,'font-family':'monospace'}); ty.textContent=fmt(v); svg.appendChild(ty); });
+  // axis labels
+  const xl=el('text',{x:(m.l+W-m.r)/2,y:H-4,'text-anchor':'middle',fill:cssv('--muted'),'font-size':11}); xl.textContent='TARGET life (cycles paid for)'; svg.appendChild(xl);
+  const yl=el('text',{x:14,y:H/2,'text-anchor':'middle',fill:cssv('--muted'),'font-size':11,transform:`rotate(-90 14 ${H/2})`}); yl.textContent='ACTUAL life (cycles)'; svg.appendChild(yl);
+  // promise diagonal (actual==target)
+  const d0=Math.max(TARGETS[0],LIVES[0]), d1=Math.min(TARGETS[1],LIVES[1]);
+  svg.appendChild(el('line',{x1:x(d0),y1:y(d0),x2:x(d1),y2:y(d1),stroke:cssv('--muted'),'stroke-width':1.5,'stroke-dasharray':'5 4'}));
+  const dl=el('text',{x:x(d1)-4,y:y(d1)-6,'text-anchor':'end',fill:cssv('--muted'),'font-size':10.5,'font-family':'monospace'}); dl.textContent='promise line'; svg.appendChild(dl);
+  // points
+  DATA.points.forEach((p,i)=>{
+    const jx=jitter(i+1)*7;
+    const c=el('circle',{cx:x(p.t)+jx, cy:y(p.l), r:opts.r||3.1, fill:colorFn(p), 'fill-opacity':opts.op||0.72, stroke:'none'});
+    if(opts.pt) c.dataset.pi=i;
+    svg.appendChild(c);
+  });
+  return {x,y,W,H,m};
+}
+const colBroke = p => p.r>=1 ? cssv('--kept') : cssv('--broke');
+const colGroup = p => ({G1:cssv('--g1'),G2:cssv('--g2'),G3:cssv('--g3')}[p.g] || cssv('--faint'));
+const colCause = p => ({Leak:cssv('--leak'),Deform:cssv('--deform')}[p.c] || cssv('--faint'));
+
+// ---------- Stage 3 groups list + rings ----------
+const GROUP_META={
+  G1:{t:'G1 — tight &amp; short = a characteristic failure',d:'Fails the same way every time. Specific and engineerable — fix the design or the spec.'},
+  G2:{t:'G2 — wide &amp; short = a process out of control',d:'Same delivery, wildly different lives. The process, not the part — stabilise the line.'},
+  G3:{t:'G3 — met or beat its promise',d:'Doing its job. Leave it alone; do not spend here.'}
+};
+(function(){
+  const byg={G1:[],G2:[],G3:[]};
+  DATA.parts.forEach(p=>byg[p.group] && byg[p.group].push(p));
+  const order=['G1','G2','G3'];
+  $('#grouplist').innerHTML=order.map(gk=>{
+    const names=byg[gk].map(p=>`${p.name}`).join(' · ');
+    return `<div class="grp ${gk.toLowerCase()}"><h4>${GROUP_META[gk].t}</h4>
+      <div class="parts">${names||'—'}</div><p>${GROUP_META[gk].d}</p></div>`;
+  }).join('');
+  // final panel copy
+  const g1=byg.G1.map(p=>p.name); const g2=byg.G2.map(p=>p.name);
+  $('#fg1').innerHTML = `${g1.join(' and ')} fail tightly and early — one almost always <b style="color:var(--leak)">leaks</b>, one almost always <b style="color:var(--deform)">deforms</b>. Redesign / re-spec those two.`;
+  $('#fg2').innerHTML = `${g2.join(', ')} scatters widely below target from the same deliveries — stabilise the process (and split the merged part codes first).`;
+})();
+
+function ringsStage3(svg,sc){
+  const groups={};
+  DATA.points.forEach(p=>{ if(p.g==='G1'||p.g==='G2'){ (groups[p.p]=groups[p.p]||{g:p.g,xs:[],ys:[]}); groups[p.p].xs.push(sc.x(p.t)); groups[p.p].ys.push(sc.y(p.l)); }});
+  Object.entries(groups).forEach(([name,o])=>{
+    if(o.xs.length<3) return;
+    const mx=o.xs.reduce((a,b)=>a+b)/o.xs.length, my=o.ys.reduce((a,b)=>a+b)/o.ys.length;
+    const sx=Math.max(14,2*Math.sqrt(o.xs.reduce((a,b)=>a+(b-mx)**2,0)/o.xs.length));
+    const sy=Math.max(14,2*Math.sqrt(o.ys.reduce((a,b)=>a+(b-my)**2,0)/o.ys.length));
+    const col=o.g==='G1'?cssv('--g1'):cssv('--g2');
+    svg.appendChild(el('ellipse',{cx:mx,cy:my,rx:sx,ry:sy,fill:'none',stroke:col,'stroke-width':1.6,'stroke-dasharray':o.g==='G2'?'2 3':'none','stroke-opacity':.9}));
+    const lb=el('text',{x:mx,y:my-sy-5,'text-anchor':'middle',fill:col,'font-size':10.5,'font-family':'monospace','font-weight':700}); lb.textContent=name.replace('Bladder ',''); svg.appendChild(lb);
+  });
+}
+
+// ---------- Stage 3b strips ----------
+function strips(svg){
+  svg.innerHTML='';
+  const parts=DATA.parts.slice().sort((a,b)=>a.medratio-b.medratio);
+  const W=640,H=470,m={l:150,r:20,t:10,b:34};
+  const x=logScale(0.1,25,m.l,W-m.r);
+  const rowH=(H-m.t-m.b)/parts.length;
+  [0.25,0.5,1,2,4,8,16].forEach(v=>{ const gx=x(v); svg.appendChild(el('line',{x1:gx,x2:gx,y1:m.t,y2:H-m.b,stroke:v===1?cssv('--muted'):cssv('--hair'),'stroke-dasharray':v===1?'4 3':'none'}));
+    const t=el('text',{x:gx,y:H-m.b+16,'text-anchor':'middle',fill:cssv('--faint'),'font-size':10,'font-family':'monospace'}); t.textContent=v+'×'; svg.appendChild(t);});
+  const byPart={}; DATA.points.forEach(p=>{ (byPart[p.p]=byPart[p.p]||[]).push(p); });
+  parts.forEach((pt,i)=>{
+    const cy=m.t+rowH*(i+0.5);
+    const nm=el('text',{x:m.l-10,y:cy+3,'text-anchor':'end',fill:cssv('--ink'),'font-size':11}); nm.textContent=pt.name.replace('Bladder ',''); svg.appendChild(nm);
+    // dominant-cause share bar hint
+    (byPart[pt.name]||[]).forEach((p,j)=>{
+      svg.appendChild(el('circle',{cx:x(Math.min(24,Math.max(0.11,p.r)))+jitter(i*97+j)*2,cy:cy+jitter(j*13+7)*rowH*0.5,r:2.7,fill:colCause(p),'fill-opacity':.8}));
+    });
+  });
+  const xl=el('text',{x:(m.l+W-m.r)/2,y:H-4,'text-anchor':'middle',fill:cssv('--muted'),'font-size':11}); xl.textContent='life ÷ target  (1× = kept the promise)'; svg.appendChild(xl);
+}
+
+// ---------- Stage 4 time ----------
+function timeStage(svg){
+  svg.innerHTML='';
+  const W=640,H=430,m={l:50,r:16,t:14,b:40};
+  const t0=new Date(M.inst_min).getTime(), t1=new Date(M.inst_max).getTime();
+  const x=linScale(t0,t1,m.l,W-m.r);
+  const y=logScale(0.08,26,H-m.b,m.t);
+  [0.25,0.5,1,2,4,8].forEach(v=>{ svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),stroke:v===1?cssv('--muted'):cssv('--hair'),'stroke-dasharray':v===1?'5 4':'none'}));
+    const ty=el('text',{x:m.l-7,y:y(v)+3,'text-anchor':'end',fill:cssv('--faint'),'font-size':10,'font-family':'monospace'}); ty.textContent=v+'×'; svg.appendChild(ty);});
+  // quarter ticks
+  for(let yr=2024;yr<=2026;yr++) for(let q=0;q<12;q+=3){ const d=new Date(yr,q,1).getTime(); if(d<t0||d>t1)continue;
+    const gx=x(d); svg.appendChild(el('line',{x1:gx,x2:gx,y1:m.t,y2:H-m.b,stroke:cssv('--hair')}));
+    const tx=el('text',{x:gx,y:H-m.b+15,'text-anchor':'middle',fill:cssv('--faint'),'font-size':9.5,'font-family':'monospace'}); tx.textContent=`${String(yr).slice(2)}Q${q/3+1}`; svg.appendChild(tx);}
+  DATA.points.forEach((p,i)=>{ if(!p.inst)return; const d=new Date(p.inst).getTime();
+    svg.appendChild(el('circle',{cx:x(d),cy:y(Math.min(25,Math.max(0.09,p.r))),r:3,fill:p.r>=1?cssv('--kept'):cssv('--broke'),'fill-opacity':.62}));});
+  const dl=el('text',{x:W-m.r,y:y(1)-6,'text-anchor':'end',fill:cssv('--muted'),'font-size':10.5,'font-family':'monospace'}); dl.textContent='promise line (1×)'; svg.appendChild(dl);
+  const xl=el('text',{x:(m.l+W-m.r)/2,y:H-3,'text-anchor':'middle',fill:cssv('--muted'),'font-size':11}); xl.textContent='INSTALL date (when the part arrived)'; svg.appendChild(xl);
+}
+
+// ---------- Stage 5 money arrows ----------
+function moneyStage(svg){
+  const sc=scatterTL(svg,colGroup,{op:.5});
+  // tint the below-line region
+  const reds=DATA.points.filter(p=>p.g==='G1'||p.g==='G2');
+  reds.forEach((p,i)=>{
+    if(i%2) return; // draw for half to avoid clutter
+    const x0=sc.x(p.t)+jitter(i+1)*7, y0=sc.y(p.l), y1=sc.y(p.t);
+    if(y1>=y0) return;
+    const ln=el('line',{x1:x0,y1:y0,x2:x0,y2:y1,stroke:cssv('--kept'),'stroke-width':1,'stroke-opacity':.5,'marker-end':'url(#arr)'});
+    ln.classList.add('lift'); svg.appendChild(ln);
+  });
+  const defs=el('defs',{}); const mk=el('marker',{id:'arr',markerWidth:6,markerHeight:6,refX:3,refY:3,orient:'auto'});
+  mk.appendChild(el('path',{d:'M0,0 L6,3 L0,6 Z',fill:cssv('--kept')})); defs.appendChild(mk); svg.appendChild(defs);
+  const money=DATA.money;
+  const lab=el('text',{x:sc.m.l+70,y:sc.H-70,fill:cssv('--broke'),'font-size':13,'font-family':'monospace','font-weight':700});
+  lab.textContent=baht(money.red)+' headroom'; svg.appendChild(lab);
+}
+(function(){
+  const mp=$('#moneyparts');
+  mp.innerHTML=DATA.money.red_parts.map(p=>`<div class="row"><span>${p.name} <span style="color:var(--faint)">·${p.n}</span></span><span class="amt">${baht(p.thb)}</span></div>`).join('');
+})();
+
+$('#foot').textContent = `Generated from ${DATA.meta.raw} raw records (${DATA.meta.n} with valid life) · median used wherever money is claimed · ฿ at assumed ฿${fmt(DATA.meta.unit_cost)}/bladder · reproducible via scripts/build_story.py`;
+
+// ---------- render all ----------
+let s3sc;
+function renderAll(){
+  scatterTL($('#s2'), colBroke);
+  s3sc=scatterTL($('#s3'), colGroup); ringsStage3($('#s3'), s3sc);
+  strips($('#s3b'));
+  timeStage($('#s4'));
+  moneyStage($('#s5'));
+}
+renderAll();
+
+// ---------- reveal + theme ----------
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
+$('#themebtn').addEventListener('click',()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next = cur==='light' ? 'dark' : (cur==='dark' ? 'light' : (matchMedia('(prefers-color-scheme:dark)').matches?'light':'dark'));
+  document.documentElement.setAttribute('data-theme',next);
+  renderAll();
+});
+</script>
+</body>
+</html>

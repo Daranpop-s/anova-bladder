@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The bladders that broke their promise</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --ink:#e9edf2; --muted:#9aa6b2; --faint:#5b6672;
+    --line:rgba(233,237,242,.12); --hair:rgba(233,237,242,.07);
+    --broke:#e0574d; --kept:#37a86a; --leak:#4a92d6; --deform:#e08a33;
+    --g1:#e0574d; --g2:#f2b134; --g3:#37a86a;
+    --accent:#e0574d;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  :root[data-theme="light"]{
+    --bg:#f3f1ec; --panel:#ffffff; --ink:#1a1e24; --muted:#5a6673; --faint:#98a2ad;
+    --line:rgba(20,26,32,.14); --hair:rgba(20,26,32,.07);
+    --broke:#cc3d33; --kept:#1f8a52; --leak:#2f74bd; --deform:#c26f1c;
+    --g1:#cc3d33; --g2:#d69a1c; --g3:#1f8a52;
+  }
+  @media (prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --bg:#f3f1ec; --panel:#ffffff; --ink:#1a1e24; --muted:#5a6673; --faint:#98a2ad;
+      --line:rgba(20,26,32,.14); --hair:rgba(20,26,32,.07);
+      --broke:#cc3d33; --kept:#1f8a52; --leak:#2f74bd; --deform:#c26f1c;
+      --g1:#cc3d33; --g2:#d69a1c; --g3:#1f8a52;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+    line-height:1.55; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px; margin:0 auto; padding:clamp(20px,4vw,60px)}
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  h1,h2,h3{letter-spacing:-.02em; text-wrap:balance; margin:0}
+
+  /* hero */
+  .hero{min-height:78vh; display:flex; flex-direction:column; justify-content:center; gap:22px}
+  .kicker{font-family:var(--mono); font-size:12.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent)}
+  .hero h1{font-size:clamp(34px,6.4vw,74px); line-height:1.02; font-weight:850; max-width:15ch}
+  .hero p{font-size:clamp(16px,2.1vw,21px); color:var(--muted); max-width:56ch; margin:0}
+  .scrollcue{font-family:var(--mono); font-size:12px; color:var(--faint); letter-spacing:.15em; margin-top:10px}
+
+  /* stage scaffolding */
+  .stage{display:grid; grid-template-columns:1.35fr .95fr; gap:clamp(20px,3vw,44px);
+    align-items:start; padding:clamp(40px,7vh,90px) 0; border-top:1px solid var(--hair)}
+  .stage .figure{position:sticky; top:24px}
+  .stage .panel{padding-top:6px}
+  .stagelabel{font-family:var(--mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); margin-bottom:10px}
+  .stage h2{font-size:clamp(23px,3vw,34px); font-weight:800; margin-bottom:14px; line-height:1.08}
+  .stage .panel p{color:var(--muted); font-size:15px; margin:0 0 13px}
+  .stage .panel p b, .stage .panel p strong{color:var(--ink)}
+  .figwrap{background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:16px 14px 10px; box-shadow:0 10px 34px rgba(0,0,0,.22)}
+  .figtitle{font-size:13px; color:var(--muted); font-family:var(--mono); padding:2px 6px 10px}
+  svg{display:block; width:100%; height:auto; overflow:visible}
+  .compute{font-family:var(--mono); font-size:11.5px; color:var(--faint); margin-top:10px; padding:8px 10px;
+    border-left:2px solid var(--line); background:var(--hair); border-radius:0 8px 8px 0; line-height:1.5}
+  .compute b{color:var(--muted)}
+
+  /* reveal */
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media (prefers-reduced-motion:reduce){ .reveal{opacity:1; transform:none; transition:none} html{scroll-behavior:auto} }
+
+  /* legend / chips */
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); padding:4px 6px 0}
+  .legend span{display:inline-flex; align-items:center; gap:6px}
+  .dot{width:10px; height:10px; border-radius:50%; display:inline-block}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* table */
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th,td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--hair)}
+  th{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  td.num{ text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+  /* group list */
+  .groups{display:flex; flex-direction:column; gap:12px; margin-top:6px}
+  .grp{border:1px solid var(--line); border-left:4px solid; border-radius:10px; padding:12px 15px}
+  .grp.g1{border-left-color:var(--g1)} .grp.g2{border-left-color:var(--g2)} .grp.g3{border-left-color:var(--g3)}
+  .grp h4{margin:0 0 3px; font-size:15px}
+  .grp .parts{font-family:var(--mono); font-size:12.5px; color:var(--muted); margin-top:5px}
+  .grp p{font-size:13px; color:var(--muted); margin:4px 0 0}
+
+  /* caveat */
+  .caveat{border:1px dashed var(--line); border-radius:12px; padding:13px 16px; margin-top:14px;
+    font-size:13px; color:var(--muted); background:var(--hair)}
+  .caveat b{color:var(--ink)}
+  .caveat .h{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:5px}
+
+  /* money */
+  .bignum{font-family:var(--mono); font-size:clamp(38px,6vw,58px); font-weight:850; color:var(--accent); line-height:1; letter-spacing:-.02em}
+  .money-parts{display:flex; flex-direction:column; gap:8px; margin-top:14px}
+  .money-parts .row{display:flex; justify-content:space-between; gap:12px; font-size:13.5px; padding:8px 12px;
+    border:1px solid var(--line); border-radius:9px}
+  .money-parts .row .amt{font-family:var(--mono); color:var(--accent); font-weight:700}
+
+  .final{padding:60px 0 30px; border-top:1px solid var(--hair)}
+  .final h2{font-size:clamp(22px,3vw,32px); font-weight:800; margin-bottom:16px; max-width:24ch}
+  .caveats-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px}
+  .foot{margin-top:40px; font-size:12px; color:var(--faint); font-family:var(--mono); border-top:1px solid var(--hair); padding-top:16px}
+
+  .themebtn{position:fixed; top:14px; right:14px; z-index:50; background:var(--panel); color:var(--muted);
+    border:1px solid var(--line); border-radius:8px; padding:6px 11px; font-family:var(--mono); font-size:12px; cursor:pointer}
+  .themebtn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  @media (max-width:800px){
+    .stage{grid-template-columns:1fr; gap:18px} .stage .figure{position:static}
+    .caveats-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<button class="themebtn" id="themebtn" aria-label="Toggle light or dark">◐ theme</button>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">One dataset &middot; five angles</div>
+    <h1 id="heroh">Everything looked normal. Then we changed the angle.</h1>
+    <p id="herop"></p>
+    <div class="scrollcue">↓ scroll — we change exactly one thing at a time</div>
+  </header>
+
+  <!-- STAGE 1 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">The monthly scrap sheet — last 8 rows</div>
+        <table id="tbl"></table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 1 · the setup</div>
+      <h2>This is what the room sees every month.</h2>
+      <p id="s1p"></p>
+      <p>Some parts are rated for a few hundred cycles, some for a couple thousand. Nothing here says <em>problem</em>. Agree it looks fine — because the next chart flips it.</p>
+    </div>
+  </section>
+
+  <!-- STAGE 2 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Every bladder plotted against its own promise (log–log)</div>
+        <svg id="s2" viewBox="0 0 640 460" role="img" aria-label="Scatter of bladder life against target, colored by whether it met target"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--kept)"></i> kept its promise (on/above the line)</span>
+          <span><i class="dot" style="background:var(--broke)"></i> broke its promise (below)</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 2 · one change — normalize</div>
+      <h2>Plot each bladder against what we <em>paid</em> for.</h2>
+      <p>Raw cycles can't be compared — a 290-cycle part and a 1,680-cycle part live on different planets. So we put every part on one axis: <b>the diagonal is its target.</b> On or above the line, it did its job. Below the line, it broke a promise.</p>
+      <p>No statistics needed. <b id="s2broke"></b> of scrapped bladders sit <b style="color:var(--broke)">below the line</b>.</p>
+      <div class="compute"><b>How to read it:</b> x = target cycles, y = actual cycles, both log. The 45° line is where actual = target. Distance below the line = fraction of the promise unmet.</div>
+    </div>
+  </section>
+
+  <!-- STAGE 3 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Same chart — now the columns have names, and shapes</div>
+        <svg id="s3" viewBox="0 0 640 460" role="img" aria-label="Same scatter grouped by part, rings show spread"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--g1)"></i> G1 tight &amp; short</span>
+          <span><i class="dot" style="background:var(--g2)"></i> G2 wide &amp; short</span>
+          <span><i class="dot" style="background:var(--g3)"></i> G3 met promise</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 3 · one change — name it</div>
+      <h2>The dots pile into columns. Columns are parts.</h2>
+      <p>Two numbers sort every part: <b>how far its median sits from target</b>, and <b>how tight the spread is</b>. Same "badness," opposite fix:</p>
+      <div class="groups" id="grouplist"></div>
+      <div class="caveat"><span class="h">caveat — merged codes</span>The two <b>15″ turnup</b> entries are different part numbers that share a name; the wide G2 spread is partly that merge. Split them before acting.</div>
+    </div>
+  </section>
+
+  <!-- STAGE 3b -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Each part as a strip — colored by how it died</div>
+        <svg id="s3b" viewBox="0 0 640 470" role="img" aria-label="Per-part strips colored by failure cause"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--leak)"></i> Leak</span>
+          <span><i class="dot" style="background:var(--deform)"></i> Deform</span>
+          <span><i class="dot" style="background:var(--faint)"></i> other</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 3b · one change — cause</div>
+      <h2>If it were random, every column would be a mix.</h2>
+      <p>They aren't. Columns come out <b>near one pure color</b> — one part leaks, another deforms, almost exclusively. A near-pure column is the eye's version of a significant result, without saying "p-value" to the room.</p>
+      <p><b style="color:var(--leak)">Leak</b> is a made-part problem; <b style="color:var(--deform)">deform</b> is a same-delivery-different-outcome problem — ours, on the floor. The vocabulary carries into every later stage.</p>
+    </div>
+  </section>
+
+  <!-- STAGE 4 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Promise-ratio vs when the bladder was installed</div>
+        <svg id="s4" viewBox="0 0 640 430" role="img" aria-label="Ratio to target against install date"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--kept)"></i> met target</span>
+          <span><i class="dot" style="background:var(--broke)"></i> below target</span>
+          <span><i class="sw" style="background:var(--muted)"></i> promise line (ratio = 1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 4 · one change — time</div>
+      <h2>A bad lot clusters by <em>arrival</em>, not by death.</h2>
+      <p>Your question was lot defects — so we key time to <b>install date</b>, when a part was made and delivered, not when it happened to die. If a delivery were bad, the reds would bunch into a vertical band.</p>
+      <p>They don't — the reds are spread across every quarter. That points away from "a bad shipment" and toward something in the plant.</p>
+      <div class="caveat"><span class="h">caveat — survivorship</span>This sheet holds only bladders <b>already scrapped</b>. Long-lived units still running aren't here, so the recent months look short. Read the right edge with that in mind — it's the first thing a sharp judge attacks, so we say it first.</div>
+    </div>
+  </section>
+
+  <!-- STAGE 5 -->
+  <section class="stage reveal">
+    <div class="figure">
+      <div class="figwrap">
+        <div class="figtitle">Back to Stage 3 — now we lift the reds onto the line</div>
+        <svg id="s5" viewBox="0 0 640 460" role="img" aria-label="Same scatter with arrows lifting under-target parts to the promise line and money annotations"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--g1)"></i> lift these</span>
+          <span><i class="sw" style="background:var(--kept)"></i> to the promise line</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="stagelabel">Stage 5 · one change — money</div>
+      <h2>The only chart the room acts on.</h2>
+      <p>Same picture they've now seen three times — so no one is decoding new axes. The arrows lift the under-target parts up to their own promise. The gap they close is money.</p>
+      <div class="bignum" id="redthb"></div>
+      <p style="margin-top:6px">headroom in the three under-target parts — the focused, fixable slice.</p>
+      <div class="money-parts" id="moneyparts"></div>
+      <div class="caveat"><span class="h">caveat — headroom, not savings</span>Valued at an <b>assumed ฿30,000 / bladder</b> (swap in the real cost). This is the gap to target if every under-target unit just reached its promise — <b>headroom you could recover</b>, not money already in the bank. Fleet-wide the same math is <b id="fleetthb"></b>.</div>
+    </div>
+  </section>
+
+  <!-- FINAL -->
+  <section class="final reveal">
+    <h2>What the room should walk out believing.</h2>
+    <div class="caveats-grid">
+      <div class="grp g1"><h4>Two parts are engineerable (G1)</h4><p id="fg1"></p></div>
+      <div class="grp g2"><h4>One part is out of control (G2)</h4><p id="fg2"></p></div>
+      <div class="grp g3"><h4>It isn't a bad lot</h4><p>Under-target parts don't cluster by install date — the failure lives in the plant and the part design, not a delivery window.</p></div>
+      <div class="grp" style="border-left-color:var(--muted)"><h4>Everything is stated in the open</h4><p>Survivorship, the merged 15″ codes, the ~24× target spread on a few freak long-lived units, and ฿ as headroom-not-savings — printed here so they can't be used against the story.</p></div>
+    </div>
+    <div class="foot" id="foot"></div>
+  </section>
+
+</div>
+
+<script>
+const DATA = {"meta": {"n": 417, "raw": 429, "kept": 219, "broke": 198, "broke_pct": 47, "tmin": 180, "tmax": 1680, "maxratio": 24.0, "unit_cost": 30000, "inst_min": "2024-01-08", "inst_max": "2026-07-04"}, "points": [{"t": 570.0, "l": 969.0, "r": 1.7, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2024-01-08"}, {"t": 400.0, "l": 530.0, "r": 1.325, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2024-02-10"}, {"t": 400.0, "l": 468.0, "r": 1.17, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-04-10"}, {"t": 290.0, "l": 254.0, "r": 0.876, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-05-06"}, {"t": 400.0, "l": 577.0, "r": 1.442, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-05-11"}, {"t": 450.0, "l": 5832.0, "r": 12.96, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-05-18"}, {"t": 450.0, "l": 533.0, "r": 1.184, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-05-18"}, {"t": 570.0, "l": 530.0, "r": 0.93, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2024-05-25"}, {"t": 1525.0, "l": 3727.0, "r": 2.444, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2024-06-10"}, {"t": 1525.0, "l": 5680.0, "r": 3.725, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2024-06-10"}, {"t": 450.0, "l": 2443.0, "r": 5.429, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-06-10"}, {"t": 830.0, "l": 472.0, "r": 0.569, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2024-06-10"}, {"t": 890.0, "l": 338.0, "r": 0.38, "p": "MTG Bladder", "c": "other", "g": "G3", "inst": "2024-06-16"}, {"t": 540.0, "l": 34.0, "r": 0.063, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-06-17"}, {"t": 400.0, "l": 53.0, "r": 0.133, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2024-07-03"}, {"t": 540.0, "l": 449.0, "r": 0.831, "p": "Bladder turnup 15\"", "c": "other", "g": "G2", "inst": "2024-07-09"}, {"t": 830.0, "l": 813.0, "r": 0.98, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2024-07-11"}, {"t": 680.0, "l": 637.0, "r": 0.937, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2024-07-13"}, {"t": 1000.0, "l": 1101.0, "r": 1.101, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2024-07-16"}, {"t": 540.0, "l": 354.0, "r": 0.656, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-07-19"}, {"t": 400.0, "l": 160.0, "r": 0.4, "p": "MTG Bladder 22\" 23\"", "c": "other", "g": "G3", "inst": "2024-07-20"}, {"t": 630.0, "l": 812.0, "r": 1.289, "p": "MTG Bladder 16\"", "c": "Leak", "g": "other", "inst": "2024-07-22"}, {"t": 1110.0, "l": 747.0, "r": 0.673, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-07-26"}, {"t": 400.0, "l": 297.0, "r": 0.743, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-07-27"}, {"t": 1000.0, "l": 6634.0, "r": 6.634, "p": "Bladder turnup 20\"", "c": "Leak", "g": "G3", "inst": "2024-08-06"}, {"t": 890.0, "l": 237.0, "r": 0.266, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2024-08-09"}, {"t": 1000.0, "l": 73.0, "r": 0.073, "p": "Bladder turnup 20\"", "c": "other", "g": "G3", "inst": "2024-08-10"}, {"t": 400.0, "l": 492.0, "r": 1.23, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2024-08-11"}, {"t": 540.0, "l": 279.0, "r": 0.517, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-08-13"}, {"t": 1000.0, "l": 814.0, "r": 0.814, "p": "Bladder turnup 20\"", "c": "other", "g": "G3", "inst": "2024-08-16"}, {"t": 400.0, "l": 198.0, "r": 0.495, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-08-19"}, {"t": 400.0, "l": 143.0, "r": 0.357, "p": "Bladder turnup 10\"", "c": "Deform", "g": "G3", "inst": "2024-08-19"}, {"t": 570.0, "l": 436.0, "r": 0.765, "p": "Bladder turnup 14\"", "c": "Deform", "g": "G3", "inst": "2024-08-19"}, {"t": 540.0, "l": 374.0, "r": 0.693, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-08-21"}, {"t": 440.0, "l": 3127.0, "r": 7.107, "p": "Bladder turnup 16\"", "c": "Leak", "g": "other", "inst": "2024-08-22"}, {"t": 570.0, "l": 2682.0, "r": 4.705, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2024-08-22"}, {"t": 400.0, "l": 388.0, "r": 0.97, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-08-22"}, {"t": 300.0, "l": 3423.0, "r": 11.41, "p": "Bladder turnup 22\"", "c": "Leak", "g": "G3", "inst": "2024-08-23"}, {"t": 630.0, "l": 1139.0, "r": 1.808, "p": "Bladder push 22\"", "c": "Leak", "g": "G3", "inst": "2024-08-23"}, {"t": 630.0, "l": 3423.0, "r": 5.433, "p": "Bladder push 22\"", "c": "Leak", "g": "G3", "inst": "2024-08-23"}, {"t": 300.0, "l": 2979.0, "r": 9.93, "p": "Bladder turnup 22\"", "c": "Leak", "g": "G3", "inst": "2024-08-23"}, {"t": 630.0, "l": 7783.0, "r": 12.354, "p": "MTG Bladder 15\"", "c": "Leak", "g": "other", "inst": "2024-08-24"}, {"t": 1000.0, "l": 3475.0, "r": 3.475, "p": "Bladder turnup 20\"", "c": "Leak", "g": "G3", "inst": "2024-08-25"}, {"t": 540.0, "l": 354.0, "r": 0.656, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-08-28"}, {"t": 290.0, "l": 673.0, "r": 2.321, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-08-29"}, {"t": 890.0, "l": 1151.0, "r": 1.293, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2024-08-31"}, {"t": 300.0, "l": 218.0, "r": 0.727, "p": "Bladder turnup 22\"", "c": "Deform", "g": "G3", "inst": "2024-09-03"}, {"t": 450.0, "l": 4984.0, "r": 11.076, "p": "Bladder push 23\"", "c": "Leak", "g": "G3", "inst": "2024-09-05"}, {"t": 450.0, "l": 3451.0, "r": 7.669, "p": "Bladder push 23\"", "c": "Leak", "g": "G3", "inst": "2024-09-05"}, {"t": 450.0, "l": 1895.0, "r": 4.211, "p": "Bladder push 23\"", "c": "Leak", "g": "G3", "inst": "2024-09-05"}, {"t": 300.0, "l": 7186.0, "r": 23.953, "p": "Bladder turnup 22\"", "c": "Leak", "g": "G3", "inst": "2024-09-07"}, {"t": 630.0, "l": 4811.0, "r": 7.637, "p": "Bladder push 22\"", "c": "Leak", "g": "G3", "inst": "2024-09-07"}, {"t": 540.0, "l": 217.0, "r": 0.402, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-09-08"}, {"t": 1110.0, "l": 1214.0, "r": 1.094, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-09-09"}, {"t": 450.0, "l": 5076.0, "r": 11.28, "p": "Bladder push 23\"", "c": "Leak", "g": "G3", "inst": "2024-09-09"}, {"t": 450.0, "l": 442.0, "r": 0.982, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-09-09"}, {"t": 450.0, "l": 5076.0, "r": 11.28, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-09-09"}, {"t": 680.0, "l": 978.0, "r": 1.438, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2024-09-10"}, {"t": 290.0, "l": 144.0, "r": 0.497, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-09-11"}, {"t": 540.0, "l": 49.0, "r": 0.091, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-09-11"}, {"t": 540.0, "l": 226.0, "r": 0.419, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-09-13"}, {"t": 300.0, "l": 2936.0, "r": 9.787, "p": "Bladder turnup 22\"", "c": "Leak", "g": "G3", "inst": "2024-09-13"}, {"t": 830.0, "l": 578.0, "r": 0.696, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2024-09-14"}, {"t": 540.0, "l": 1026.0, "r": 1.9, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-09-14"}, {"t": 1680.0, "l": 1381.0, "r": 0.822, "p": "Bladder push 21\"", "c": "Leak", "g": "other", "inst": "2024-09-14"}, {"t": 450.0, "l": 1247.0, "r": 2.771, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-09-16"}, {"t": 540.0, "l": 218.0, "r": 0.404, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-09-16"}, {"t": 450.0, "l": 1751.0, "r": 3.891, "p": "Bladder push 23\"", "c": "Leak", "g": "G3", "inst": "2024-09-17"}, {"t": 830.0, "l": 1106.0, "r": 1.333, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2024-09-18"}, {"t": 570.0, "l": 537.0, "r": 0.942, "p": "Bladder turnup 14\"", "c": "Deform", "g": "G3", "inst": "2024-09-19"}, {"t": 890.0, "l": 1392.0, "r": 1.564, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2024-09-20"}, {"t": 400.0, "l": 498.0, "r": 1.245, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-09-24"}, {"t": 290.0, "l": 243.0, "r": 0.838, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-09-24"}, {"t": 400.0, "l": 360.0, "r": 0.9, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-09-25"}, {"t": 400.0, "l": 361.0, "r": 0.902, "p": "Bladder turnup 10\"", "c": "other", "g": "G3", "inst": "2024-09-28"}, {"t": 400.0, "l": 88.0, "r": 0.22, "p": "Bladder turnup 10\"", "c": "Deform", "g": "G3", "inst": "2024-09-30"}, {"t": 450.0, "l": 4807.0, "r": 10.682, "p": "Bladder push 23\"", "c": "Leak", "g": "G3", "inst": "2024-10-02"}, {"t": 450.0, "l": 2840.0, "r": 6.311, "p": "Bladder turnup 23\"", "c": "Leak", "g": "G3", "inst": "2024-10-02"}, {"t": 680.0, "l": 634.0, "r": 0.932, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2024-10-07"}, {"t": 400.0, "l": 449.0, "r": 1.123, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-10-09"}, {"t": 400.0, "l": 216.0, "r": 0.54, "p": "Bladder turnup 10\"", "c": "Deform", "g": "G3", "inst": "2024-10-09"}, {"t": 400.0, "l": 366.0, "r": 0.915, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2024-10-12"}, {"t": 450.0, "l": 129.0, "r": 0.287, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-10-13"}, {"t": 450.0, "l": 83.0, "r": 0.184, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-10-13"}, {"t": 1525.0, "l": 6373.0, "r": 4.179, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2024-10-16"}, {"t": 1525.0, "l": 1299.0, "r": 0.852, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2024-10-17"}, {"t": 1000.0, "l": 4591.0, "r": 4.591, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2024-10-17"}, {"t": 400.0, "l": 708.0, "r": 1.77, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2024-10-18"}, {"t": 450.0, "l": 213.0, "r": 0.473, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-10-18"}, {"t": 450.0, "l": 144.0, "r": 0.32, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-10-19"}, {"t": 540.0, "l": 2434.0, "r": 4.507, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-10-19"}, {"t": 540.0, "l": 3607.0, "r": 6.68, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-10-21"}, {"t": 630.0, "l": 970.0, "r": 1.54, "p": "MTG Bladder 16\"", "c": "Leak", "g": "other", "inst": "2024-10-21"}, {"t": 1110.0, "l": 856.0, "r": 0.771, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-10-23"}, {"t": 680.0, "l": 243.0, "r": 0.357, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2024-10-25"}, {"t": 290.0, "l": 158.0, "r": 0.545, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-10-26"}, {"t": 450.0, "l": 2754.0, "r": 6.12, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-10-26"}, {"t": 400.0, "l": 850.0, "r": 2.125, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2024-10-26"}, {"t": 450.0, "l": 305.0, "r": 0.678, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-10-27"}, {"t": 290.0, "l": 263.0, "r": 0.907, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-10-28"}, {"t": 680.0, "l": 777.0, "r": 1.143, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2024-10-30"}, {"t": 680.0, "l": 862.0, "r": 1.268, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2024-10-31"}, {"t": 290.0, "l": 260.0, "r": 0.897, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-11-01"}, {"t": 570.0, "l": 497.0, "r": 0.872, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2024-11-03"}, {"t": 400.0, "l": 292.0, "r": 0.73, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2024-11-04"}, {"t": 1000.0, "l": 1736.0, "r": 1.736, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2024-11-07"}, {"t": 450.0, "l": 1851.0, "r": 4.113, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-11-08"}, {"t": 290.0, "l": 332.0, "r": 1.145, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-11-12"}, {"t": 450.0, "l": 431.0, "r": 0.958, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2024-11-12"}, {"t": 570.0, "l": 674.0, "r": 1.182, "p": "Bladder turnup 14\"", "c": "Deform", "g": "G3", "inst": "2024-11-13"}, {"t": 1000.0, "l": 1230.0, "r": 1.23, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2024-11-13"}, {"t": 400.0, "l": 671.0, "r": 1.677, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2024-11-14"}, {"t": 400.0, "l": 645.0, "r": 1.613, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-11-17"}, {"t": 400.0, "l": 842.0, "r": 2.105, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-11-26"}, {"t": 400.0, "l": 1349.0, "r": 3.373, "p": "Bladder turnup 10\"", "c": "Deform", "g": "G3", "inst": "2024-11-28"}, {"t": 290.0, "l": 194.0, "r": 0.669, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-12-01"}, {"t": 400.0, "l": 677.0, "r": 1.692, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2024-12-02"}, {"t": 180.0, "l": 135.0, "r": 0.75, "p": "Bladder turnup 6\"", "c": "Leak", "g": "other", "inst": "2024-12-03"}, {"t": 420.0, "l": 255.0, "r": 0.607, "p": "Bladder MTG", "c": "Leak", "g": "other", "inst": "2024-12-04"}, {"t": 400.0, "l": 643.0, "r": 1.607, "p": "Bladder turnup 10\"", "c": "Deform", "g": "G3", "inst": "2024-12-09"}, {"t": 830.0, "l": 1266.0, "r": 1.525, "p": "Bladder turnup 21\"", "c": "Leak", "g": "G1", "inst": "2024-12-11"}, {"t": 1525.0, "l": 8291.0, "r": 5.437, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2024-12-15"}, {"t": 890.0, "l": 1336.0, "r": 1.501, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2024-12-16"}, {"t": 420.0, "l": 409.0, "r": 0.974, "p": "Bladder MTG", "c": "Leak", "g": "other", "inst": "2024-12-16"}, {"t": 890.0, "l": 329.0, "r": 0.37, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2024-12-17"}, {"t": 540.0, "l": 2822.0, "r": 5.226, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-12-17"}, {"t": 540.0, "l": 3048.0, "r": 5.644, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2024-12-20"}, {"t": 630.0, "l": 5076.0, "r": 8.057, "p": "Bladder push 22\"", "c": "Leak", "g": "G3", "inst": "2024-12-20"}, {"t": 1000.0, "l": 3501.0, "r": 3.501, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2024-12-21"}, {"t": 570.0, "l": 1423.0, "r": 2.496, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2024-12-24"}, {"t": 300.0, "l": 3022.0, "r": 10.073, "p": "Bladder turnup 22\"", "c": "Deform", "g": "G3", "inst": "2024-12-25"}, {"t": 1110.0, "l": 3170.0, "r": 2.856, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-12-25"}, {"t": 1110.0, "l": 2880.0, "r": 2.595, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2024-12-25"}, {"t": 830.0, "l": 437.0, "r": 0.527, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2024-12-25"}, {"t": 290.0, "l": 144.0, "r": 0.497, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2024-12-28"}, {"t": 290.0, "l": 208.0, "r": 0.717, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-01-04"}, {"t": 290.0, "l": 419.0, "r": 1.445, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-01-06"}, {"t": 290.0, "l": 195.0, "r": 0.672, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-01-07"}, {"t": 1000.0, "l": 1390.0, "r": 1.39, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-01-09"}, {"t": 1525.0, "l": 3883.0, "r": 2.546, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-01-09"}, {"t": 1000.0, "l": 1902.0, "r": 1.902, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-01-09"}, {"t": 680.0, "l": 1604.0, "r": 2.359, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-01-10"}, {"t": 1525.0, "l": 968.0, "r": 0.635, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-01-10"}, {"t": 450.0, "l": 4682.0, "r": 10.404, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-01-11"}, {"t": 450.0, "l": 4605.0, "r": 10.233, "p": "Bladder push 23\"", "c": "Leak", "g": "G3", "inst": "2025-01-11"}, {"t": 830.0, "l": 848.0, "r": 1.022, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2025-01-13"}, {"t": 830.0, "l": 977.0, "r": 1.177, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2025-01-15"}, {"t": 540.0, "l": 61.0, "r": 0.113, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-01-16"}, {"t": 570.0, "l": 1263.0, "r": 2.216, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-01-20"}, {"t": 290.0, "l": 156.0, "r": 0.538, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-01-31"}, {"t": 400.0, "l": 300.0, "r": 0.75, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-01-31"}, {"t": 300.0, "l": 2619.0, "r": 8.73, "p": "Bladder turnup 22\"", "c": "Leak", "g": "G3", "inst": "2025-02-07"}, {"t": 630.0, "l": 2619.0, "r": 4.157, "p": "Bladder push 22\"", "c": "Leak", "g": "G3", "inst": "2025-02-07"}, {"t": 1525.0, "l": 5349.0, "r": 3.508, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-02-08"}, {"t": 630.0, "l": 1764.0, "r": 2.8, "p": "MTG Bladder 8\"", "c": "Leak", "g": "other", "inst": "2025-02-09"}, {"t": 400.0, "l": 354.0, "r": 0.885, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-02-09"}, {"t": 630.0, "l": 8590.0, "r": 13.635, "p": "MTG Bladder 10\" 12\"", "c": "Leak", "g": "other", "inst": "2025-02-11"}, {"t": 290.0, "l": 175.0, "r": 0.603, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-02-12"}, {"t": 290.0, "l": 134.0, "r": 0.462, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-02-12"}, {"t": 400.0, "l": 162.0, "r": 0.405, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-02-13"}, {"t": 400.0, "l": 739.0, "r": 1.847, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-02-20"}, {"t": 540.0, "l": 1605.0, "r": 2.972, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-02-21"}, {"t": 540.0, "l": 325.0, "r": 0.602, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-02-23"}, {"t": 540.0, "l": 564.0, "r": 1.044, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-02-25"}, {"t": 1525.0, "l": 3944.0, "r": 2.586, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-02-26"}, {"t": 680.0, "l": 406.0, "r": 0.597, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-02-28"}, {"t": 680.0, "l": 1946.0, "r": 2.862, "p": "Bladder turnup 12\"", "c": "Deform", "g": "G3", "inst": "2025-03-06"}, {"t": 890.0, "l": 359.0, "r": 0.403, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2025-03-07"}, {"t": 400.0, "l": 363.0, "r": 0.907, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-03-07"}, {"t": 680.0, "l": 1394.0, "r": 2.05, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-03-10"}, {"t": 1000.0, "l": 1558.0, "r": 1.558, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-03-10"}, {"t": 1000.0, "l": 370.0, "r": 0.37, "p": "Bladder turnup 20\"", "c": "other", "g": "G3", "inst": "2025-03-14"}, {"t": 1000.0, "l": 214.0, "r": 0.214, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-03-14"}, {"t": 400.0, "l": 422.0, "r": 1.055, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-03-17"}, {"t": 400.0, "l": 481.0, "r": 1.202, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-03-20"}, {"t": 830.0, "l": 535.0, "r": 0.645, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2025-03-21"}, {"t": 570.0, "l": 2784.0, "r": 4.884, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-03-22"}, {"t": 290.0, "l": 158.0, "r": 0.545, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-03-23"}, {"t": 1000.0, "l": 1321.0, "r": 1.321, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-03-23"}, {"t": 890.0, "l": 1735.0, "r": 1.949, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2025-03-24"}, {"t": 290.0, "l": 170.0, "r": 0.586, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-03-24"}, {"t": 1680.0, "l": 397.0, "r": 0.236, "p": "Bladder push 21\"", "c": "Leak", "g": "other", "inst": "2025-03-25"}, {"t": 290.0, "l": 279.0, "r": 0.962, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-03-27"}, {"t": 400.0, "l": 704.0, "r": 1.76, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-03-29"}, {"t": 1000.0, "l": 1261.0, "r": 1.261, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-04-10"}, {"t": 540.0, "l": 143.0, "r": 0.265, "p": "Bladder turnup 15\"", "c": "other", "g": "G2", "inst": "2025-04-10"}, {"t": 540.0, "l": 1716.0, "r": 3.178, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-04-11"}, {"t": 540.0, "l": 2462.0, "r": 4.559, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-04-17"}, {"t": 540.0, "l": 46.0, "r": 0.085, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-04-17"}, {"t": 540.0, "l": 1414.0, "r": 2.619, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-04-19"}, {"t": 400.0, "l": 796.0, "r": 1.99, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-04-24"}, {"t": 450.0, "l": 97.0, "r": 0.216, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-04-24"}, {"t": 450.0, "l": 1410.0, "r": 3.133, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-04-27"}, {"t": 400.0, "l": 165.0, "r": 0.412, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-04-28"}, {"t": 630.0, "l": 1390.0, "r": 2.206, "p": "MTG Bladder 10\" 12\"", "c": "Leak", "g": "other", "inst": "2025-04-29"}, {"t": 1000.0, "l": 1006.0, "r": 1.006, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-04-30"}, {"t": 400.0, "l": 409.0, "r": 1.022, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-05-02"}, {"t": 400.0, "l": 603.0, "r": 1.508, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-05-02"}, {"t": 570.0, "l": 1627.0, "r": 2.854, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-05-02"}, {"t": 630.0, "l": 981.0, "r": 1.557, "p": "MTG Bladder 16\"", "c": "other", "g": "other", "inst": "2025-05-03"}, {"t": 400.0, "l": 3113.0, "r": 7.782, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-05-06"}, {"t": 400.0, "l": 99.0, "r": 0.247, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-05-07"}, {"t": 290.0, "l": 229.0, "r": 0.79, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-05-09"}, {"t": 450.0, "l": 1761.0, "r": 3.913, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-05-17"}, {"t": 1110.0, "l": 3445.0, "r": 3.104, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-05-21"}, {"t": 1000.0, "l": 2064.0, "r": 2.064, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-05-23"}, {"t": 400.0, "l": 310.0, "r": 0.775, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-05-24"}, {"t": 1110.0, "l": 2776.0, "r": 2.501, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-05-27"}, {"t": 1000.0, "l": 786.0, "r": 0.786, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-05-29"}, {"t": 1000.0, "l": 803.0, "r": 0.803, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-05-30"}, {"t": 400.0, "l": 1950.0, "r": 4.875, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-06-01"}, {"t": 630.0, "l": 3409.0, "r": 5.411, "p": "MTG Bladder 15\"", "c": "Leak", "g": "other", "inst": "2025-06-04"}, {"t": 630.0, "l": 2988.0, "r": 4.743, "p": "Bladder push 22\"", "c": "Leak", "g": "G3", "inst": "2025-06-05"}, {"t": 540.0, "l": 306.0, "r": 0.567, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-06-10"}, {"t": 1000.0, "l": 211.0, "r": 0.211, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-06-11"}, {"t": 400.0, "l": 528.0, "r": 1.32, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-06-14"}, {"t": 540.0, "l": 1320.0, "r": 2.444, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-06-16"}, {"t": 1000.0, "l": 1501.0, "r": 1.501, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-06-23"}, {"t": 400.0, "l": 349.0, "r": 0.873, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-06-25"}, {"t": 1680.0, "l": 3059.0, "r": 1.821, "p": "Bladder push 21\"", "c": "Leak", "g": "other", "inst": "2025-06-26"}, {"t": 680.0, "l": 1046.0, "r": 1.538, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-06-27"}, {"t": 540.0, "l": 286.0, "r": 0.53, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-06-30"}, {"t": 570.0, "l": 1673.0, "r": 2.935, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-07-02"}, {"t": 540.0, "l": 1375.0, "r": 2.546, "p": "Bladder turnup 15\"", "c": "other", "g": "G2", "inst": "2025-07-05"}, {"t": 400.0, "l": 1560.0, "r": 3.9, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-07-09"}, {"t": 290.0, "l": 243.0, "r": 0.838, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-07-15"}, {"t": 290.0, "l": 243.0, "r": 0.838, "p": "Bladder turnup 8\"", "c": "other", "g": "G1", "inst": "2025-07-15"}, {"t": 890.0, "l": 1576.0, "r": 1.771, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2025-07-16"}, {"t": 400.0, "l": 513.0, "r": 1.282, "p": "MTG Bladder 22\" 23\"", "c": "other", "g": "G3", "inst": "2025-07-17"}, {"t": 830.0, "l": 276.0, "r": 0.333, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2025-07-19"}, {"t": 680.0, "l": 2013.0, "r": 2.96, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-07-22"}, {"t": 1000.0, "l": 1190.0, "r": 1.19, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-07-23"}, {"t": 830.0, "l": 1265.0, "r": 1.524, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2025-07-23"}, {"t": 1525.0, "l": 6212.0, "r": 4.073, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-07-23"}, {"t": 540.0, "l": 338.0, "r": 0.626, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-07-25"}, {"t": 400.0, "l": 350.0, "r": 0.875, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-07-26"}, {"t": 450.0, "l": 829.0, "r": 1.842, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-07-28"}, {"t": 830.0, "l": 641.0, "r": 0.772, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2025-07-29"}, {"t": 540.0, "l": 479.0, "r": 0.887, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-07-31"}, {"t": 540.0, "l": 977.0, "r": 1.809, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-07-31"}, {"t": 1000.0, "l": 584.0, "r": 0.584, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-08-02"}, {"t": 400.0, "l": 223.0, "r": 0.557, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-08-05"}, {"t": 400.0, "l": 435.0, "r": 1.087, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-08-06"}, {"t": 450.0, "l": 325.0, "r": 0.722, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-08-08"}, {"t": 290.0, "l": 220.0, "r": 0.759, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-08-11"}, {"t": 290.0, "l": 134.0, "r": 0.462, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-08-11"}, {"t": 400.0, "l": 443.0, "r": 1.107, "p": "MTG Bladder 22\" 23\"", "c": "other", "g": "G3", "inst": "2025-08-12"}, {"t": 1000.0, "l": 276.0, "r": 0.276, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-08-12"}, {"t": 450.0, "l": 2079.0, "r": 4.62, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-08-13"}, {"t": 1525.0, "l": 1136.0, "r": 0.745, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-08-14"}, {"t": 290.0, "l": 257.0, "r": 0.886, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-08-14"}, {"t": 570.0, "l": 4547.0, "r": 7.977, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-08-15"}, {"t": 570.0, "l": 3734.0, "r": 6.551, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-08-16"}, {"t": 1000.0, "l": 3393.0, "r": 3.393, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-08-20"}, {"t": 680.0, "l": 1785.0, "r": 2.625, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-08-26"}, {"t": 450.0, "l": 534.0, "r": 1.187, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-08-28"}, {"t": 540.0, "l": 79.0, "r": 0.146, "p": "Bladder turnup 15\"", "c": "other", "g": "G2", "inst": "2025-08-29"}, {"t": 400.0, "l": 270.0, "r": 0.675, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-08-29"}, {"t": 400.0, "l": 295.0, "r": 0.738, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-08-31"}, {"t": 540.0, "l": 1056.0, "r": 1.956, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-08-31"}, {"t": 540.0, "l": 2864.0, "r": 5.304, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-08-31"}, {"t": 290.0, "l": 171.0, "r": 0.59, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-09-01"}, {"t": 1000.0, "l": 869.0, "r": 0.869, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-09-02"}, {"t": 290.0, "l": 229.0, "r": 0.79, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-09-04"}, {"t": 540.0, "l": 2201.0, "r": 4.076, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-09-08"}, {"t": 450.0, "l": 21.0, "r": 0.047, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-09-10"}, {"t": 450.0, "l": 535.0, "r": 1.189, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-09-10"}, {"t": 400.0, "l": 439.0, "r": 1.097, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-09-11"}, {"t": 450.0, "l": 426.0, "r": 0.947, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-09-11"}, {"t": 400.0, "l": 441.0, "r": 1.103, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-09-12"}, {"t": 630.0, "l": 4314.0, "r": 6.848, "p": "MTG Bladder 10\" 12\"", "c": "other", "g": "other", "inst": "2025-09-13"}, {"t": 400.0, "l": 268.0, "r": 0.67, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-09-15"}, {"t": 400.0, "l": 536.0, "r": 1.34, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-09-15"}, {"t": 400.0, "l": 317.0, "r": 0.792, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-09-16"}, {"t": 830.0, "l": 450.0, "r": 0.542, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2025-09-17"}, {"t": 290.0, "l": 97.0, "r": 0.334, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-09-18"}, {"t": 890.0, "l": 1533.0, "r": 1.722, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2025-09-18"}, {"t": 290.0, "l": 232.0, "r": 0.8, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-09-18"}, {"t": 540.0, "l": 416.0, "r": 0.77, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-09-20"}, {"t": 680.0, "l": 885.0, "r": 1.301, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-09-23"}, {"t": 400.0, "l": 811.0, "r": 2.027, "p": "MTG Bladder 22\" 23\"", "c": "other", "g": "G3", "inst": "2025-09-24"}, {"t": 1000.0, "l": 895.0, "r": 0.895, "p": "Bladder turnup 20\"", "c": "Leak", "g": "G3", "inst": "2025-09-28"}, {"t": 450.0, "l": 371.0, "r": 0.824, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-09-29"}, {"t": 680.0, "l": 636.0, "r": 0.935, "p": "Bladder turnup 12\"", "c": "Deform", "g": "G3", "inst": "2025-09-30"}, {"t": 1525.0, "l": 992.0, "r": 0.65, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-10-02"}, {"t": 1000.0, "l": 4657.0, "r": 4.657, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-10-02"}, {"t": 400.0, "l": 492.0, "r": 1.23, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-10-03"}, {"t": 450.0, "l": 307.0, "r": 0.682, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-10-03"}, {"t": 290.0, "l": 192.0, "r": 0.662, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-10-06"}, {"t": 290.0, "l": 57.0, "r": 0.197, "p": "Bladder turnup 8\"", "c": "other", "g": "G1", "inst": "2025-10-08"}, {"t": 290.0, "l": 203.0, "r": 0.7, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-10-10"}, {"t": 290.0, "l": 263.0, "r": 0.907, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-10-10"}, {"t": 400.0, "l": 492.0, "r": 1.23, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-10-11"}, {"t": 450.0, "l": 375.0, "r": 0.833, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-10-11"}, {"t": 290.0, "l": 170.0, "r": 0.586, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2025-10-14"}, {"t": 450.0, "l": 1946.0, "r": 4.324, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-10-15"}, {"t": 1110.0, "l": 1285.0, "r": 1.158, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-10-15"}, {"t": 1110.0, "l": 982.0, "r": 0.885, "p": "Bladder turnup 15\"", "c": "other", "g": "G2", "inst": "2025-10-16"}, {"t": 570.0, "l": 423.0, "r": 0.742, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-10-18"}, {"t": 450.0, "l": 371.0, "r": 0.824, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-10-21"}, {"t": 450.0, "l": 1034.0, "r": 2.298, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-10-23"}, {"t": 400.0, "l": 229.0, "r": 0.573, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-10-31"}, {"t": 680.0, "l": 1163.0, "r": 1.71, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-11-02"}, {"t": 1525.0, "l": 1682.0, "r": 1.103, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-11-02"}, {"t": 400.0, "l": 231.0, "r": 0.578, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-11-03"}, {"t": 680.0, "l": 1063.0, "r": 1.563, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-11-04"}, {"t": 400.0, "l": 221.0, "r": 0.552, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-11-08"}, {"t": 400.0, "l": 494.0, "r": 1.235, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-11-08"}, {"t": 1000.0, "l": 985.0, "r": 0.985, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-11-12"}, {"t": 400.0, "l": 270.0, "r": 0.675, "p": "Bladder turnup 10\"", "c": "other", "g": "G3", "inst": "2025-11-14"}, {"t": 570.0, "l": 776.0, "r": 1.361, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-11-15"}, {"t": 570.0, "l": 1532.0, "r": 2.688, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2025-11-16"}, {"t": 1000.0, "l": 638.0, "r": 0.638, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-11-17"}, {"t": 890.0, "l": 840.0, "r": 0.944, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2025-11-17"}, {"t": 450.0, "l": 1551.0, "r": 3.447, "p": "Bladder turnup 23\"", "c": "Leak", "g": "G3", "inst": "2025-11-17"}, {"t": 400.0, "l": 405.0, "r": 1.012, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2025-11-18"}, {"t": 400.0, "l": 257.0, "r": 0.642, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2025-11-19"}, {"t": 540.0, "l": 161.0, "r": 0.298, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-11-20"}, {"t": 540.0, "l": 71.0, "r": 0.131, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-11-20"}, {"t": 450.0, "l": 1329.0, "r": 2.953, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-11-21"}, {"t": 540.0, "l": 188.0, "r": 0.348, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-11-23"}, {"t": 540.0, "l": 298.0, "r": 0.552, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-11-25"}, {"t": 540.0, "l": 302.0, "r": 0.559, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-11-27"}, {"t": 1525.0, "l": 3666.0, "r": 2.404, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2025-11-28"}, {"t": 540.0, "l": 149.0, "r": 0.276, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-11-30"}, {"t": 540.0, "l": 2575.0, "r": 4.769, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-12-02"}, {"t": 540.0, "l": 352.0, "r": 0.652, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-12-03"}, {"t": 540.0, "l": 252.0, "r": 0.467, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-12-03"}, {"t": 680.0, "l": 934.0, "r": 1.374, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-12-04"}, {"t": 680.0, "l": 934.0, "r": 1.374, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-12-04"}, {"t": 1000.0, "l": 1056.0, "r": 1.056, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-12-07"}, {"t": 540.0, "l": 438.0, "r": 0.811, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-12-10"}, {"t": 1000.0, "l": 1024.0, "r": 1.024, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2025-12-12"}, {"t": 540.0, "l": 2437.0, "r": 4.513, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2025-12-12"}, {"t": 400.0, "l": 643.0, "r": 1.607, "p": "MTG Bladder 22\" 23\"", "c": "other", "g": "G3", "inst": "2025-12-14"}, {"t": 540.0, "l": 635.0, "r": 1.176, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2025-12-18"}, {"t": 450.0, "l": 605.0, "r": 1.344, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2025-12-19"}, {"t": 890.0, "l": 743.0, "r": 0.835, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2025-12-20"}, {"t": 680.0, "l": 661.0, "r": 0.972, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-12-27"}, {"t": 680.0, "l": 362.0, "r": 0.532, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2025-12-27"}, {"t": 830.0, "l": 99.0, "r": 0.119, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2025-12-28"}, {"t": 1110.0, "l": 5556.0, "r": 5.005, "p": "Bladder turnup 15\"", "c": "Leak", "g": "G2", "inst": "2026-01-05"}, {"t": 540.0, "l": 303.0, "r": 0.561, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2026-01-05"}, {"t": 680.0, "l": 299.0, "r": 0.44, "p": "Bladder turnup 12\"", "c": "other", "g": "G3", "inst": "2026-01-07"}, {"t": 540.0, "l": 151.0, "r": 0.28, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2026-01-10"}, {"t": 1000.0, "l": 1626.0, "r": 1.626, "p": "Bladder turnup 20\"", "c": "Leak", "g": "G3", "inst": "2026-01-11"}, {"t": 400.0, "l": 388.0, "r": 0.97, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2026-01-13"}, {"t": 570.0, "l": 266.0, "r": 0.467, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2026-01-13"}, {"t": 540.0, "l": 1270.0, "r": 2.352, "p": "Bladder turnup 15\"", "c": "other", "g": "G2", "inst": "2026-01-13"}, {"t": 400.0, "l": 465.0, "r": 1.163, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2026-01-15"}, {"t": 400.0, "l": 331.0, "r": 0.828, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-01-16"}, {"t": 450.0, "l": 614.0, "r": 1.364, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2026-01-18"}, {"t": 400.0, "l": 286.0, "r": 0.715, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-01-19"}, {"t": 680.0, "l": 326.0, "r": 0.479, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2026-01-19"}, {"t": 830.0, "l": 848.0, "r": 1.022, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2026-01-20"}, {"t": 1000.0, "l": 1585.0, "r": 1.585, "p": "Bladder turnup 20\"", "c": "Leak", "g": "G3", "inst": "2026-01-20"}, {"t": 680.0, "l": 602.0, "r": 0.885, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2026-01-20"}, {"t": 400.0, "l": 435.0, "r": 1.087, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-01-23"}, {"t": 420.0, "l": 893.0, "r": 2.126, "p": "Bladder MTG", "c": "Leak", "g": "other", "inst": "2026-01-24"}, {"t": 400.0, "l": 423.0, "r": 1.058, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-01-24"}, {"t": 630.0, "l": 497.0, "r": 0.789, "p": "MTG Bladder 16\"", "c": "Leak", "g": "other", "inst": "2026-01-25"}, {"t": 1110.0, "l": 1783.0, "r": 1.606, "p": "Bladder turnup 15\"", "c": "other", "g": "G2", "inst": "2026-01-26"}, {"t": 680.0, "l": 739.0, "r": 1.087, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2026-01-26"}, {"t": 290.0, "l": 232.0, "r": 0.8, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-01-29"}, {"t": 290.0, "l": 255.0, "r": 0.879, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-02-01"}, {"t": 290.0, "l": 255.0, "r": 0.879, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-02-04"}, {"t": 290.0, "l": 202.0, "r": 0.697, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-02-06"}, {"t": 290.0, "l": 207.0, "r": 0.714, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-02-09"}, {"t": 290.0, "l": 207.0, "r": 0.714, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-02-09"}, {"t": 570.0, "l": 1446.0, "r": 2.537, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2026-02-11"}, {"t": 830.0, "l": 514.0, "r": 0.619, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2026-02-11"}, {"t": 290.0, "l": 218.0, "r": 0.752, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-02-12"}, {"t": 400.0, "l": 508.0, "r": 1.27, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-02-15"}, {"t": 400.0, "l": 531.0, "r": 1.327, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-02-17"}, {"t": 400.0, "l": 295.0, "r": 0.738, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2026-02-20"}, {"t": 450.0, "l": 1673.0, "r": 3.718, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2026-02-22"}, {"t": 400.0, "l": 480.0, "r": 1.2, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-02-22"}, {"t": 400.0, "l": 548.0, "r": 1.37, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-02-24"}, {"t": 680.0, "l": 1742.0, "r": 2.562, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2026-02-27"}, {"t": 570.0, "l": 2335.0, "r": 4.096, "p": "Bladder turnup 14\"", "c": "other", "g": "G3", "inst": "2026-02-28"}, {"t": 570.0, "l": 1447.0, "r": 2.539, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2026-02-28"}, {"t": 830.0, "l": 358.0, "r": 0.431, "p": "Bladder turnup 21\"", "c": "Deform", "g": "G1", "inst": "2026-03-01"}, {"t": 400.0, "l": 860.0, "r": 2.15, "p": "MTG Bladder 22\" 23\"", "c": "other", "g": "G3", "inst": "2026-03-05"}, {"t": 680.0, "l": 897.0, "r": 1.319, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": "2026-03-09"}, {"t": 570.0, "l": 803.0, "r": 1.409, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2026-03-16"}, {"t": 1000.0, "l": 645.0, "r": 0.645, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2026-03-19"}, {"t": 450.0, "l": 315.0, "r": 0.7, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2026-03-24"}, {"t": 400.0, "l": 555.0, "r": 1.387, "p": "MTG Bladder 22\" 23\"", "c": "other", "g": "G3", "inst": "2026-03-26"}, {"t": 450.0, "l": 1181.0, "r": 2.624, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2026-03-27"}, {"t": 890.0, "l": 1092.0, "r": 1.227, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2026-04-19"}, {"t": 400.0, "l": 470.0, "r": 1.175, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2026-04-21"}, {"t": 570.0, "l": 1511.0, "r": 2.651, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2026-04-22"}, {"t": 400.0, "l": 624.0, "r": 1.56, "p": "Bladder turnup 10\"", "c": "other", "g": "G3", "inst": "2026-04-25"}, {"t": 630.0, "l": 830.0, "r": 1.317, "p": "MTG Bladder 10\" 12\"", "c": "Leak", "g": "other", "inst": "2026-04-26"}, {"t": 570.0, "l": 1601.0, "r": 2.809, "p": "Bladder turnup 14\"", "c": "Leak", "g": "G3", "inst": "2026-04-26"}, {"t": 1000.0, "l": 515.0, "r": 0.515, "p": "Bladder turnup 20\"", "c": "Deform", "g": "G3", "inst": "2026-05-04"}, {"t": 890.0, "l": 420.0, "r": 0.472, "p": "MTG Bladder", "c": "Leak", "g": "G3", "inst": "2026-05-12"}, {"t": 450.0, "l": 286.0, "r": 0.636, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2026-05-25"}, {"t": 680.0, "l": 407.0, "r": 0.599, "p": "Bladder turnup 12\"", "c": "other", "g": "G3", "inst": "2026-05-27"}, {"t": 400.0, "l": 494.0, "r": 1.235, "p": "MTG Bladder 22\" 23\"", "c": "other", "g": "G3", "inst": "2026-05-29"}, {"t": 400.0, "l": 15.0, "r": 0.037, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2026-05-29"}, {"t": 1525.0, "l": 61.0, "r": 0.04, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2026-06-02"}, {"t": 1525.0, "l": 1304.0, "r": 0.855, "p": "Bladder push 20\"", "c": "Leak", "g": "G3", "inst": "2026-06-04"}, {"t": 450.0, "l": 124.0, "r": 0.276, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2026-06-05"}, {"t": 400.0, "l": 316.0, "r": 0.79, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2026-06-07"}, {"t": 450.0, "l": 663.0, "r": 1.473, "p": "Bladder turnup 23\"", "c": "Deform", "g": "G3", "inst": "2026-06-11"}, {"t": 540.0, "l": 1658.0, "r": 3.07, "p": "Bladder turnup 15\"", "c": "Deform", "g": "G2", "inst": "2026-06-11"}, {"t": 290.0, "l": 239.0, "r": 0.824, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-06-12"}, {"t": 290.0, "l": 245.0, "r": 0.845, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-06-13"}, {"t": 290.0, "l": 248.0, "r": 0.855, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-06-16"}, {"t": 400.0, "l": 459.0, "r": 1.147, "p": "MTG Bladder 22\" 23\"", "c": "Leak", "g": "G3", "inst": "2026-06-17"}, {"t": 290.0, "l": 286.0, "r": 0.986, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-06-17"}, {"t": 290.0, "l": 227.0, "r": 0.783, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-06-20"}, {"t": 290.0, "l": 189.0, "r": 0.652, "p": "Bladder turnup 8\"", "c": "other", "g": "G1", "inst": "2026-06-23"}, {"t": 290.0, "l": 246.0, "r": 0.848, "p": "Bladder turnup 8\"", "c": "Leak", "g": "G1", "inst": "2026-06-24"}, {"t": 400.0, "l": 379.0, "r": 0.948, "p": "Bladder turnup 10\"", "c": "Leak", "g": "G3", "inst": "2026-07-04"}, {"t": 680.0, "l": 11220.0, "r": 16.5, "p": "Bladder turnup 12\"", "c": "Leak", "g": "G3", "inst": null}], "parts": [{"name": "Bladder turnup 21\"", "n": 17, "target": 830, "med": 578, "medratio": 0.7, "iqr": 0.48, "maxr": 1.5, "leak": 0.06, "deform": 0.94, "broke": 0.65, "group": "G1", "dom": "deform", "waste_thb": 143024}, {"name": "Bladder turnup 8\"", "n": 48, "target": 290, "med": 223, "medratio": 0.77, "iqr": 0.26, "maxr": 2.3, "leak": 0.94, "deform": 0.0, "broke": 0.94, "group": "G1", "dom": "leak", "waste_thb": 384724}, {"name": "Bladder turnup 15\"", "n": 63, "target": 540, "med": 564, "medratio": 0.83, "iqr": 2.08, "maxr": 6.7, "leak": 0.35, "deform": 0.54, "broke": 0.54, "group": "G2", "dom": "deform", "waste_thb": 522468}, {"name": "MTG Bladder", "n": 14, "target": 890, "med": 966, "medratio": 1.09, "iqr": 1.13, "maxr": 1.9, "leak": 0.93, "deform": 0.0, "broke": 0.5, "group": "G3", "dom": "leak", "waste_thb": 99910}, {"name": "Bladder turnup 10\"", "n": 42, "target": 400, "med": 437, "medratio": 1.09, "iqr": 0.66, "maxr": 7.8, "leak": 0.81, "deform": 0.12, "broke": 0.4, "group": "G3", "dom": "leak", "waste_thb": 160800}, {"name": "MTG Bladder 22\" 23\"", "n": 46, "target": 400, "med": 439, "medratio": 1.1, "iqr": 0.58, "maxr": 2.1, "leak": 0.83, "deform": 0.0, "broke": 0.46, "group": "G3", "dom": "leak", "waste_thb": 231825}, {"name": "Bladder turnup 20\"", "n": 37, "target": 1000, "med": 1101, "medratio": 1.1, "iqr": 0.84, "maxr": 6.6, "leak": 0.14, "deform": 0.78, "broke": 0.41, "group": "G3", "dom": "deform", "waste_thb": 189660}, {"name": "Bladder turnup 23\"", "n": 42, "target": 450, "med": 570, "medratio": 1.27, "iqr": 2.94, "maxr": 13.0, "leak": 0.05, "deform": 0.95, "broke": 0.43, "group": "G3", "dom": "deform", "waste_thb": 222333}, {"name": "Bladder turnup 12\"", "n": 29, "target": 680, "med": 885, "medratio": 1.3, "iqr": 0.78, "maxr": 16.5, "leak": 0.86, "deform": 0.07, "broke": 0.38, "group": "G3", "dom": "leak", "waste_thb": 100014}, {"name": "Bladder push 20\"", "n": 16, "target": 1525, "med": 3696, "medratio": 2.42, "iqr": 2.74, "maxr": 5.4, "leak": 1.0, "deform": 0.0, "broke": 0.38, "group": "G3", "dom": "leak", "waste_thb": 66688}, {"name": "Bladder turnup 14\"", "n": 24, "target": 570, "med": 1434, "medratio": 2.52, "iqr": 1.75, "maxr": 8.0, "leak": 0.83, "deform": 0.12, "broke": 0.25, "group": "G3", "dom": "leak", "waste_thb": 38473}, {"name": "Bladder push 22\"", "n": 6, "target": 630, "med": 3205, "medratio": 5.09, "iqr": 2.78, "maxr": 8.1, "leak": 1.0, "deform": 0.0, "broke": 0.0, "group": "G3", "dom": "leak", "waste_thb": 0}, {"name": "Bladder turnup 22\"", "n": 7, "target": 300, "med": 2979, "medratio": 9.93, "iqr": 1.48, "maxr": 24.0, "leak": 0.71, "deform": 0.29, "broke": 0.14, "group": "G3", "dom": "leak", "waste_thb": 8200}, {"name": "Bladder push 23\"", "n": 7, "target": 450, "med": 4605, "medratio": 10.23, "iqr": 4.94, "maxr": 11.3, "leak": 1.0, "deform": 0.0, "broke": 0.0, "group": "G3", "dom": "leak", "waste_thb": 0}], "sample": [["2026-07-10", "Bladder turnup 10\"", 400, 379, "Leak"], ["2026-07-10", "Bladder turnup 10\"", 400, 3113, "Leak"], ["2026-07-11", "Bladder turnup 15\"", 540, 1658, "Deform"], ["2026-07-11", "Bladder turnup 8\"", 290, 189, "Tear"], ["2026-07-12", "Bladder turnup 23\"", 450, 663, "Deform"], ["2026-07-12", "Bladder push 20\"", 1525, 1304, "Leak"], ["2026-07-13", "Bladder turnup 12\"", 680, 1046, "Leak"], ["2026-07-14", "Bladder turnup 8\"", 290, 246, "Leak"]], "money": {"fleet": 2222777, "red": 1050217, "red_parts": [{"name": "Bladder turnup 21\"", "thb": 143024, "n": 17}, {"name": "Bladder turnup 8\"", "thb": 384724, "n": 48}, {"name": "Bladder turnup 15\"", "thb": 522468, "n": 63}]}};
+const M = DATA.meta;
+const $ = s => document.querySelector(s);
+const fmt = n => n.toLocaleString('en-US');
+const baht = n => '฿' + (n>=1e6 ? (n/1e6).toFixed(2)+'M' : fmt(Math.round(n)));
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------- copy ----------
+$('#herop').textContent = `${M.raw} rows of bladder scrap records. ${M.n} with a usable life reading. `
+  + `The table balances, the totals foot, nobody flags it. And yet ${M.broke_pct}% never did what we paid for — you just can't see it until the axis changes.`;
+$('#s1p').textContent = `${M.n} bladders, each with a target life and the life it actually reached. It reconciles. It looks like a normal month.`;
+$('#s2broke').textContent = `${M.broke} of ${M.n} (${M.broke_pct}%)`;
+$('#redthb').textContent = baht(DATA.money.red);
+$('#fleetthb').textContent = baht(DATA.money.fleet);
+
+// ---------- Stage 1 table ----------
+(function(){
+  const head='<tr><th>scrapped</th><th>part</th><th class="num">target</th><th class="num">life</th><th>cause</th></tr>';
+  const body=DATA.sample.map(r=>`<tr><td class="mono">${r[0]}</td><td>${r[1]}</td><td class="num">${fmt(r[2])}</td><td class="num">${fmt(r[3])}</td><td>${r[4]}</td></tr>`).join('');
+  $('#tbl').innerHTML=head+body;
+})();
+
+// ---------- scale helpers ----------
+function logScale(dmin,dmax,rmin,rmax){
+  const a=Math.log(dmin), b=Math.log(dmax);
+  return v => rmin + (rmax-rmin)*(Math.log(v)-a)/(b-a);
+}
+function linScale(dmin,dmax,rmin,rmax){ return v => rmin+(rmax-rmin)*(v-dmin)/(dmax-dmin); }
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function jitter(seed){ const x=Math.sin(seed*127.1)*43758.5; return (x-Math.floor(x))-0.5; }
+
+const TARGETS=[150,1800], LIVES=[12,13000];
+// ---------- reusable target-vs-life scatter ----------
+function scatterTL(svg, colorFn, opts={}){
+  svg.innerHTML='';
+  const W=640,H=460, m={l:52,r:16,t:14,b:42};
+  const x=logScale(TARGETS[0],TARGETS[1],m.l,W-m.r);
+  const y=logScale(LIVES[0],LIVES[1],H-m.b,m.t);
+  // grid + axis ticks
+  [200,400,800,1600].forEach(t=>{ if(t<TARGETS[1]){ svg.appendChild(el('line',{x1:x(t),x2:x(t),y1:m.t,y2:H-m.b,stroke:cssv('--hair')}));
+    const tx=el('text',{x:x(t),y:H-m.b+16,'text-anchor':'middle',fill:cssv('--faint'),'font-size':10,'font-family':'monospace'}); tx.textContent=fmt(t); svg.appendChild(tx);} });
+  [30,100,300,1000,3000,10000].forEach(v=>{ svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),stroke:cssv('--hair')}));
+    const ty=el('text',{x:m.l-7,y:y(v)+3,'text-anchor':'end',fill:cssv('--faint'),'font-size':10,'font-family':'monospace'}); ty.textContent=fmt(v); svg.appendChild(ty); });
+  // axis labels
+  const xl=el('text',{x:(m.l+W-m.r)/2,y:H-4,'text-anchor':'middle',fill:cssv('--muted'),'font-size':11}); xl.textContent='TARGET life (cycles paid for)'; svg.appendChild(xl);
+  const yl=el('text',{x:14,y:H/2,'text-anchor':'middle',fill:cssv('--muted'),'font-size':11,transform:`rotate(-90 14 ${H/2})`}); yl.textContent='ACTUAL life (cycles)'; svg.appendChild(yl);
+  // promise diagonal (actual==target)
+  const d0=Math.max(TARGETS[0],LIVES[0]), d1=Math.min(TARGETS[1],LIVES[1]);
+  svg.appendChild(el('line',{x1:x(d0),y1:y(d0),x2:x(d1),y2:y(d1),stroke:cssv('--muted'),'stroke-width':1.5,'stroke-dasharray':'5 4'}));
+  const dl=el('text',{x:x(d1)-4,y:y(d1)-6,'text-anchor':'end',fill:cssv('--muted'),'font-size':10.5,'font-family':'monospace'}); dl.textContent='promise line'; svg.appendChild(dl);
+  // points
+  DATA.points.forEach((p,i)=>{
+    const jx=jitter(i+1)*7;
+    const c=el('circle',{cx:x(p.t)+jx, cy:y(p.l), r:opts.r||3.1, fill:colorFn(p), 'fill-opacity':opts.op||0.72, stroke:'none'});
+    if(opts.pt) c.dataset.pi=i;
+    svg.appendChild(c);
+  });
+  return {x,y,W,H,m};
+}
+const colBroke = p => p.r>=1 ? cssv('--kept') : cssv('--broke');
+const colGroup = p => ({G1:cssv('--g1'),G2:cssv('--g2'),G3:cssv('--g3')}[p.g] || cssv('--faint'));
+const colCause = p => ({Leak:cssv('--leak'),Deform:cssv('--deform')}[p.c] || cssv('--faint'));
+
+// ---------- Stage 3 groups list + rings ----------
+const GROUP_META={
+  G1:{t:'G1 — tight &amp; short = a characteristic failure',d:'Fails the same way every time. Specific and engineerable — fix the design or the spec.'},
+  G2:{t:'G2 — wide &amp; short = a process out of control',d:'Same delivery, wildly different lives. The process, not the part — stabilise the line.'},
+  G3:{t:'G3 — met or beat its promise',d:'Doing its job. Leave it alone; do not spend here.'}
+};
+(function(){
+  const byg={G1:[],G2:[],G3:[]};
+  DATA.parts.forEach(p=>byg[p.group] && byg[p.group].push(p));
+  const order=['G1','G2','G3'];
+  $('#grouplist').innerHTML=order.map(gk=>{
+    const names=byg[gk].map(p=>`${p.name}`).join(' · ');
+    return `<div class="grp ${gk.toLowerCase()}"><h4>${GROUP_META[gk].t}</h4>
+      <div class="parts">${names||'—'}</div><p>${GROUP_META[gk].d}</p></div>`;
+  }).join('');
+  // final panel copy
+  const g1=byg.G1.map(p=>p.name); const g2=byg.G2.map(p=>p.name);
+  $('#fg1').innerHTML = `${g1.join(' and ')} fail tightly and early — one almost always <b style="color:var(--leak)">leaks</b>, one almost always <b style="color:var(--deform)">deforms</b>. Redesign / re-spec those two.`;
+  $('#fg2').innerHTML = `${g2.join(', ')} scatters widely below target from the same deliveries — stabilise the process (and split the merged part codes first).`;
+})();
+
+function ringsStage3(svg,sc){
+  const groups={};
+  DATA.points.forEach(p=>{ if(p.g==='G1'||p.g==='G2'){ (groups[p.p]=groups[p.p]||{g:p.g,xs:[],ys:[]}); groups[p.p].xs.push(sc.x(p.t)); groups[p.p].ys.push(sc.y(p.l)); }});
+  Object.entries(groups).forEach(([name,o])=>{
+    if(o.xs.length<3) return;
+    const mx=o.xs.reduce((a,b)=>a+b)/o.xs.length, my=o.ys.reduce((a,b)=>a+b)/o.ys.length;
+    const sx=Math.max(14,2*Math.sqrt(o.xs.reduce((a,b)=>a+(b-mx)**2,0)/o.xs.length));
+    const sy=Math.max(14,2*Math.sqrt(o.ys.reduce((a,b)=>a+(b-my)**2,0)/o.ys.length));
+    const col=o.g==='G1'?cssv('--g1'):cssv('--g2');
+    svg.appendChild(el('ellipse',{cx:mx,cy:my,rx:sx,ry:sy,fill:'none',stroke:col,'stroke-width':1.6,'stroke-dasharray':o.g==='G2'?'2 3':'none','stroke-opacity':.9}));
+    const lb=el('text',{x:mx,y:my-sy-5,'text-anchor':'middle',fill:col,'font-size':10.5,'font-family':'monospace','font-weight':700}); lb.textContent=name.replace('Bladder ',''); svg.appendChild(lb);
+  });
+}
+
+// ---------- Stage 3b strips ----------
+function strips(svg){
+  svg.innerHTML='';
+  const parts=DATA.parts.slice().sort((a,b)=>a.medratio-b.medratio);
+  const W=640,H=470,m={l:150,r:20,t:10,b:34};
+  const x=logScale(0.1,25,m.l,W-m.r);
+  const rowH=(H-m.t-m.b)/parts.length;
+  [0.25,0.5,1,2,4,8,16].forEach(v=>{ const gx=x(v); svg.appendChild(el('line',{x1:gx,x2:gx,y1:m.t,y2:H-m.b,stroke:v===1?cssv('--muted'):cssv('--hair'),'stroke-dasharray':v===1?'4 3':'none'}));
+    const t=el('text',{x:gx,y:H-m.b+16,'text-anchor':'middle',fill:cssv('--faint'),'font-size':10,'font-family':'monospace'}); t.textContent=v+'×'; svg.appendChild(t);});
+  const byPart={}; DATA.points.forEach(p=>{ (byPart[p.p]=byPart[p.p]||[]).push(p); });
+  parts.forEach((pt,i)=>{
+    const cy=m.t+rowH*(i+0.5);
+    const nm=el('text',{x:m.l-10,y:cy+3,'text-anchor':'end',fill:cssv('--ink'),'font-size':11}); nm.textContent=pt.name.replace('Bladder ',''); svg.appendChild(nm);
+    // dominant-cause share bar hint
+    (byPart[pt.name]||[]).forEach((p,j)=>{
+      svg.appendChild(el('circle',{cx:x(Math.min(24,Math.max(0.11,p.r)))+jitter(i*97+j)*2,cy:cy+jitter(j*13+7)*rowH*0.5,r:2.7,fill:colCause(p),'fill-opacity':.8}));
+    });
+  });
+  const xl=el('text',{x:(m.l+W-m.r)/2,y:H-4,'text-anchor':'middle',fill:cssv('--muted'),'font-size':11}); xl.textContent='life ÷ target  (1× = kept the promise)'; svg.appendChild(xl);
+}
+
+// ---------- Stage 4 time ----------
+function timeStage(svg){
+  svg.innerHTML='';
+  const W=640,H=430,m={l:50,r:16,t:14,b:40};
+  const t0=new Date(M.inst_min).getTime(), t1=new Date(M.inst_max).getTime();
+  const x=linScale(t0,t1,m.l,W-m.r);
+  const y=logScale(0.08,26,H-m.b,m.t);
+  [0.25,0.5,1,2,4,8].forEach(v=>{ svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),stroke:v===1?cssv('--muted'):cssv('--hair'),'stroke-dasharray':v===1?'5 4':'none'}));
+    const ty=el('text',{x:m.l-7,y:y(v)+3,'text-anchor':'end',fill:cssv('--faint'),'font-size':10,'font-family':'monospace'}); ty.textContent=v+'×'; svg.appendChild(ty);});
+  // quarter ticks
+  for(let yr=2024;yr<=2026;yr++) for(let q=0;q<12;q+=3){ const d=new Date(yr,q,1).getTime(); if(d<t0||d>t1)continue;
+    const gx=x(d); svg.appendChild(el('line',{x1:gx,x2:gx,y1:m.t,y2:H-m.b,stroke:cssv('--hair')}));
+    const tx=el('text',{x:gx,y:H-m.b+15,'text-anchor':'middle',fill:cssv('--faint'),'font-size':9.5,'font-family':'monospace'}); tx.textContent=`${String(yr).slice(2)}Q${q/3+1}`; svg.appendChild(tx);}
+  DATA.points.forEach((p,i)=>{ if(!p.inst)return; const d=new Date(p.inst).getTime();
+    svg.appendChild(el('circle',{cx:x(d),cy:y(Math.min(25,Math.max(0.09,p.r))),r:3,fill:p.r>=1?cssv('--kept'):cssv('--broke'),'fill-opacity':.62}));});
+  const dl=el('text',{x:W-m.r,y:y(1)-6,'text-anchor':'end',fill:cssv('--muted'),'font-size':10.5,'font-family':'monospace'}); dl.textContent='promise line (1×)'; svg.appendChild(dl);
+  const xl=el('text',{x:(m.l+W-m.r)/2,y:H-3,'text-anchor':'middle',fill:cssv('--muted'),'font-size':11}); xl.textContent='INSTALL date (when the part arrived)'; svg.appendChild(xl);
+}
+
+// ---------- Stage 5 money arrows ----------
+function moneyStage(svg){
+  const sc=scatterTL(svg,colGroup,{op:.5});
+  // tint the below-line region
+  const reds=DATA.points.filter(p=>p.g==='G1'||p.g==='G2');
+  reds.forEach((p,i)=>{
+    if(i%2) return; // draw for half to avoid clutter
+    const x0=sc.x(p.t)+jitter(i+1)*7, y0=sc.y(p.l), y1=sc.y(p.t);
+    if(y1>=y0) return;
+    const ln=el('line',{x1:x0,y1:y0,x2:x0,y2:y1,stroke:cssv('--kept'),'stroke-width':1,'stroke-opacity':.5,'marker-end':'url(#arr)'});
+    ln.classList.add('lift'); svg.appendChild(ln);
+  });
+  const defs=el('defs',{}); const mk=el('marker',{id:'arr',markerWidth:6,markerHeight:6,refX:3,refY:3,orient:'auto'});
+  mk.appendChild(el('path',{d:'M0,0 L6,3 L0,6 Z',fill:cssv('--kept')})); defs.appendChild(mk); svg.appendChild(defs);
+  const money=DATA.money;
+  const lab=el('text',{x:sc.m.l+70,y:sc.H-70,fill:cssv('--broke'),'font-size':13,'font-family':'monospace','font-weight':700});
+  lab.textContent=baht(money.red)+' headroom'; svg.appendChild(lab);
+}
+(function(){
+  const mp=$('#moneyparts');
+  mp.innerHTML=DATA.money.red_parts.map(p=>`<div class="row"><span>${p.name} <span style="color:var(--faint)">·${p.n}</span></span><span class="amt">${baht(p.thb)}</span></div>`).join('');
+})();
+
+$('#foot').textContent = `Generated from ${DATA.meta.raw} raw records (${DATA.meta.n} with valid life) · median used wherever money is claimed · ฿ at assumed ฿${fmt(DATA.meta.unit_cost)}/bladder · reproducible via scripts/build_story.py`;
+
+// ---------- render all ----------
+let s3sc;
+function renderAll(){
+  scatterTL($('#s2'), colBroke);
+  s3sc=scatterTL($('#s3'), colGroup); ringsStage3($('#s3'), s3sc);
+  strips($('#s3b'));
+  timeStage($('#s4'));
+  moneyStage($('#s5'));
+}
+renderAll();
+
+// ---------- reveal + theme ----------
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
+$('#themebtn').addEventListener('click',()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next = cur==='light' ? 'dark' : (cur==='dark' ? 'light' : (matchMedia('(prefers-color-scheme:dark)').matches?'light':'dark'));
+  document.documentElement.setAttribute('data-theme',next);
+  renderAll();
+});
+</script>
+</body>
+</html>
